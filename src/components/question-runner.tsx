@@ -1,0 +1,107 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import type { SessionQuestion, Teil } from "@/lib/questions";
+import type { Bewertung, KursStat } from "@/lib/bewertung-types";
+import { QuestionScreen } from "@/components/question-screen";
+import { ErgebnisScreen } from "@/components/ergebnis-screen";
+
+type Ergebnis = { modul: string; kurs: string; bewertung: Bewertung };
+
+function zuKursStats(ergebnisse: Ergebnis[]): KursStat[] {
+  const map = new Map<string, KursStat>();
+  for (const e of ergebnisse) {
+    const key = `${e.modul} ${e.kurs}`;
+    const stat = map.get(key) ?? { modul: e.modul, kurs: e.kurs, richtig: 0, teilweise: 0, falsch: 0 };
+    stat[e.bewertung] += 1;
+    map.set(key, stat);
+  }
+  return [...map.values()];
+}
+
+async function sessionStatusAendern(sessionId: string, status: "abgeschlossen" | "abgebrochen") {
+  await fetch(`/api/sessions/${sessionId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function QuestionRunner({
+  questions,
+  teil,
+  modus,
+  filterWerte,
+  istAdmin,
+  ungeleseneNachrichten,
+}: {
+  questions: SessionQuestion[];
+  teil: Teil;
+  modus: string;
+  filterWerte: Record<string, unknown>;
+  istAdmin: boolean;
+  ungeleseneNachrichten: number;
+}) {
+  const router = useRouter();
+  const [sessionId] = useState(() => crypto.randomUUID());
+  const [index, setIndex] = useState(0);
+  const [ergebnisse, setErgebnisse] = useState<Ergebnis[]>([]);
+
+  useEffect(() => {
+    if (questions.length === 0) return;
+    fetch("/api/sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: sessionId, modus, filterWerte }),
+    });
+    // Nur beim Mounten anlegen — sessionId/modus/filterWerte ändern sich über
+    // die Lebensdauer dieser Komponenteninstanz nicht (key erzwingt Remount).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function abbrechen() {
+    await sessionStatusAendern(sessionId, "abgebrochen");
+    router.push("/");
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-3 p-6 text-center">
+        <p>Keine Fragen für diese Auswahl gefunden.</p>
+        <Link href="/" className="text-sm text-accent hover:underline">
+          Zurück zur Auswahl
+        </Link>
+      </div>
+    );
+  }
+
+  if (index >= questions.length) {
+    return <ErgebnisScreen stats={zuKursStats(ergebnisse)} teil={teil} />;
+  }
+
+  return (
+    <QuestionScreen
+      key={questions[index].id}
+      question={questions[index]}
+      index={index}
+      gesamt={questions.length}
+      sessionId={sessionId}
+      istAdmin={istAdmin}
+      ungeleseneNachrichten={ungeleseneNachrichten}
+      onAbbrechen={abbrechen}
+      onNext={(result) => {
+        if (result.bewertung) {
+          const { modul, kurs } = questions[index];
+          setErgebnisse((prev) => [...prev, { modul, kurs, bewertung: result.bewertung! }]);
+        }
+        const neuerIndex = index + 1;
+        if (neuerIndex >= questions.length) {
+          sessionStatusAendern(sessionId, "abgeschlossen");
+        }
+        setIndex(neuerIndex);
+      }}
+    />
+  );
+}
