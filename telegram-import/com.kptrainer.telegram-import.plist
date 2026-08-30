@@ -21,6 +21,6 @@
     <key>StandardErrorPath</key>
     <string>/Users/mohammed-salahboughalem/Documents/md-trainer/telegram-import/lauf.log</string>
     <key>RunAtLoad</key>
-    <false/>
+    <true/>
 </dict>
 </plist>
