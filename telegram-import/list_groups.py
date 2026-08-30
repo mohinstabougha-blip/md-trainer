@@ -9,6 +9,8 @@ Windows-Konsole (Standard-Codepage, meist nicht UTF-8) einen
 UnicodeEncodeError auslösen — auch bei Umleitung über `> datei.txt` in
 PowerShell, da die Konsole dabei genauso beteiligt ist."""
 
+from __future__ import annotations
+
 import asyncio
 import sys
 from pathlib import Path

@@ -25,6 +25,8 @@ durchlaufen weiterhin die normale Admin-Freigabe.
 Separates Projekt, kein Teil der Next.js-App.
 """
 
+from __future__ import annotations
+
 import argparse
 import asyncio
 import json
