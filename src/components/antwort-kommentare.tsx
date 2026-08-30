@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { MeldenButton } from "@/components/melden-button";
+import { useTurnstile } from "@/components/turnstile-widget";
 
 type KommentarMitName = {
   id: number;
@@ -11,12 +12,19 @@ type KommentarMitName = {
   anzeigename: string;
 };
 
-export function AntwortKommentare({ questionId }: { questionId: number }) {
+export function AntwortKommentare({
+  questionId,
+  istGast = false,
+}: {
+  questionId: number;
+  istGast?: boolean;
+}) {
   const [kommentare, setKommentare] = useState<KommentarMitName[]>([]);
   const [aktuelleUserId, setAktuelleUserId] = useState<string | null>(null);
   const [text, setText] = useState("");
   const [sendet, setSendet] = useState(false);
   const [geladen, setGeladen] = useState(false);
+  const { token, widget, reset, erforderlich } = useTurnstile();
 
   const laden = useCallback(async () => {
     const res = await fetch(`/api/antwort-kommentare?questionId=${questionId}`);
@@ -40,12 +48,14 @@ export function AntwortKommentare({ questionId }: { questionId: number }) {
     const res = await fetch("/api/antwort-kommentare", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ questionId, text }),
+      body: JSON.stringify({ questionId, text, turnstileToken: token }),
     });
     setSendet(false);
     if (res.ok) {
       setText("");
       laden();
+    } else {
+      reset();
     }
   }
 
@@ -66,7 +76,7 @@ export function AntwortKommentare({ questionId }: { questionId: number }) {
                 <span className="text-xs text-zinc-400">
                   {new Date(k.erstelltAm).toLocaleString("de-DE")}
                 </span>
-                {k.userId !== aktuelleUserId && (
+                {!istGast && k.userId !== aktuelleUserId && (
                   <MeldenButton
                     inhaltTyp="antwort_kommentar"
                     inhaltId={k.id}
@@ -84,21 +94,29 @@ export function AntwortKommentare({ questionId }: { questionId: number }) {
         )}
       </div>
 
-      <div className="flex gap-2">
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Ergänzung/Anmerkung…"
-          className="kp-input flex-1"
-        />
-        <button
-          type="button"
-          disabled={sendet || text.trim() === ""}
-          onClick={absenden}
-          className="kp-btn-primary"
-        >
-          Senden
-        </button>
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-2">
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Ergänzung/Anmerkung…"
+            className="kp-input flex-1"
+          />
+          <button
+            type="button"
+            disabled={sendet || text.trim() === "" || (erforderlich && !token)}
+            onClick={absenden}
+            className="kp-btn-primary"
+          >
+            Senden
+          </button>
+        </div>
+        {text.trim() !== "" && widget}
+        {istGast && (
+          <p className="text-xs text-zinc-400">
+            Du kommentierst als Gast. Melde dich an, um unter deinem Namen zu schreiben.
+          </p>
+        )}
       </div>
     </div>
   );

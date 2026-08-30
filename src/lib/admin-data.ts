@@ -34,6 +34,19 @@ export async function getAllQuestionsAdmin(): Promise<AdminQuestion[]> {
   return data;
 }
 
+/** Alle vorhandenen Modul-Namen (aus questions + offenen Einreichungen), alphabetisch. */
+export async function getAlleModulnamen(): Promise<string[]> {
+  const supabase = createAdminClient();
+  const [fragen, einreichungen] = await Promise.all([
+    supabase.from("questions").select("modul"),
+    supabase.from("einreichungen").select("modul").eq("status", "offen"),
+  ]);
+  const namen = new Set<string>();
+  for (const r of fragen.data ?? []) if (r.modul) namen.add(r.modul);
+  for (const r of einreichungen.data ?? []) if (r.modul) namen.add(r.modul);
+  return [...namen].sort((a, b) => a.localeCompare(b, "de"));
+}
+
 export async function getQuestionByIdAdmin(id: number): Promise<AdminQuestion | null> {
   const supabase = createAdminClient();
   const { data, error } = await supabase

@@ -76,7 +76,9 @@ export default async function SessionPage({
         teil={teil}
         modus={filter.modus}
         filterWerte={{ ...filter, teil, sortierung, fortschrittFilter }}
+        fortschrittFilter={fortschrittFilter}
         istAdmin={istAdmin}
+        istGast={!user}
         ungeleseneNachrichten={ungeleseneNachrichten}
       />
     </div>

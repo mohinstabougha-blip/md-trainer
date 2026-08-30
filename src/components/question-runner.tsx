@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { SessionQuestion, Teil } from "@/lib/questions";
+import type { SessionQuestion, Teil, FortschrittFilter } from "@/lib/questions";
 import type { Bewertung, KursStat } from "@/lib/bewertung-types";
 import { QuestionScreen } from "@/components/question-screen";
 import { ErgebnisScreen } from "@/components/ergebnis-screen";
+import { getGastBewertungen } from "@/lib/gast-fortschritt";
 
 type Ergebnis = { modul: string; kurs: string; bewertung: Bewertung };
 
@@ -34,14 +35,18 @@ export function QuestionRunner({
   teil,
   modus,
   filterWerte,
+  fortschrittFilter,
   istAdmin,
+  istGast,
   ungeleseneNachrichten,
 }: {
   questions: SessionQuestion[];
   teil: Teil;
   modus: string;
   filterWerte: Record<string, unknown>;
+  fortschrittFilter: FortschrittFilter;
   istAdmin: boolean;
+  istGast: boolean;
   ungeleseneNachrichten: number;
 }) {
   const router = useRouter();
@@ -49,8 +54,32 @@ export function QuestionRunner({
   const [index, setIndex] = useState(0);
   const [ergebnisse, setErgebnisse] = useState<Ergebnis[]>([]);
 
+  // Gäste: der Fortschritts-Filter kann serverseitig nicht angewendet werden
+  // (results liegen im localStorage). Nachträglich hier filtern.
+  const gastFilterAktiv = istGast && fortschrittFilter !== "alle";
+  const [gastBereit, setGastBereit] = useState(!gastFilterAktiv);
+  const [gefiltert, setGefiltert] = useState<SessionQuestion[]>(questions);
+
   useEffect(() => {
-    if (questions.length === 0) return;
+    if (!gastFilterAktiv) return;
+    const bewertungen = getGastBewertungen();
+    const neu = questions.filter((q) => {
+      const b = bewertungen[q.id];
+      if (fortschrittFilter === "nie_gesehen") return !b;
+      if (fortschrittFilter === "schon_gesehen") return !!b;
+      return b === "falsch" || b === "teilweise";
+    });
+    /* eslint-disable-next-line react-hooks/set-state-in-effect */
+    setGefiltert(neu);
+    setGastBereit(true);
+    // questions/fortschrittFilter sind über die Lebensdauer stabil (key-Remount).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const aktiveFragen = gastFilterAktiv ? gefiltert : questions;
+
+  useEffect(() => {
+    if (istGast || aktiveFragen.length === 0) return;
     fetch("/api/sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -62,11 +91,15 @@ export function QuestionRunner({
   }, []);
 
   async function abbrechen() {
-    await sessionStatusAendern(sessionId, "abgebrochen");
+    if (!istGast) await sessionStatusAendern(sessionId, "abgebrochen");
     router.push("/");
   }
 
-  if (questions.length === 0) {
+  if (!gastBereit) {
+    return <div className="min-h-screen" aria-hidden />;
+  }
+
+  if (aktiveFragen.length === 0) {
     return (
       <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-3 p-6 text-center">
         <p>Keine Fragen für diese Auswahl gefunden.</p>
@@ -77,27 +110,28 @@ export function QuestionRunner({
     );
   }
 
-  if (index >= questions.length) {
+  if (index >= aktiveFragen.length) {
     return <ErgebnisScreen stats={zuKursStats(ergebnisse)} teil={teil} />;
   }
 
   return (
     <QuestionScreen
-      key={questions[index].id}
-      question={questions[index]}
+      key={aktiveFragen[index].id}
+      question={aktiveFragen[index]}
       index={index}
-      gesamt={questions.length}
+      gesamt={aktiveFragen.length}
       sessionId={sessionId}
       istAdmin={istAdmin}
+      istGast={istGast}
       ungeleseneNachrichten={ungeleseneNachrichten}
       onAbbrechen={abbrechen}
       onNext={(result) => {
         if (result.bewertung) {
-          const { modul, kurs } = questions[index];
+          const { modul, kurs } = aktiveFragen[index];
           setErgebnisse((prev) => [...prev, { modul, kurs, bewertung: result.bewertung! }]);
         }
         const neuerIndex = index + 1;
-        if (neuerIndex >= questions.length) {
+        if (neuerIndex >= aktiveFragen.length && !istGast) {
           sessionStatusAendern(sessionId, "abgeschlossen");
         }
         setIndex(neuerIndex);

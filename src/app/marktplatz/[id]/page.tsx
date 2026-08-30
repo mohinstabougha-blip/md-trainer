@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Rechtshinweis } from "@/components/marktplatz/rechtshinweis";
 import { NachrichtSenden } from "@/components/marktplatz/nachricht-senden";
 import { Kommentare } from "@/components/marktplatz/kommentare";
@@ -16,13 +16,15 @@ export default async function AngebotDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const angebot = await getAngebot(Number(id));
-  if (!angebot) notFound();
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const angebot = await getAngebot(Number(id));
+  if (!angebot) notFound();
 
   const kommentare = await getKommentare(angebot.id);
   const namen = await getAnzeigenamen([angebot.user_id, ...kommentare.map((k) => k.user_id)]);

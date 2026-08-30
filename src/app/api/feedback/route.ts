@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 
 const GUELTIGE_TYPEN = [
   "frage_fehlerhaft",
@@ -13,6 +14,10 @@ export async function POST(request: Request) {
   const questionId = body?.questionId;
   const typ = body?.typ;
   const kommentar = body?.kommentar;
+
+  if (!(await verifyTurnstile(body?.turnstileToken, clientIp(request)))) {
+    return NextResponse.json({ error: "Bot-Schutz fehlgeschlagen" }, { status: 403 });
+  }
 
   if (!questionId || typeof questionId !== "number") {
     return NextResponse.json({ error: "questionId fehlt" }, { status: 400 });

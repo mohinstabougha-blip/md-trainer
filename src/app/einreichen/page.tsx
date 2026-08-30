@@ -14,13 +14,17 @@ export default async function EinreichenPage() {
   } = await supabase.auth.getUser();
 
   const [einreichungen, ungelesen] = await Promise.all([
-    getMeineEinreichungen(user!.id),
-    getUngeleseneNachrichtenAnzahl(user!.id),
+    user ? getMeineEinreichungen(user.id) : Promise.resolve([]),
+    user ? getUngeleseneNachrichtenAnzahl(user.id) : Promise.resolve(0),
   ]);
 
   return (
     <div className="min-h-screen bg-zinc-50 pb-20 sm:pb-0">
-      <AppHeader email={user!.email!} ungeleseneNachrichten={ungelesen} />
+      <AppHeader
+        email={user?.email ?? undefined}
+        ungeleseneNachrichten={ungelesen}
+        istGast={!user}
+      />
       <main className="mx-auto max-w-2xl p-6">
         <div className="flex flex-col gap-6">
           <div>
@@ -28,10 +32,11 @@ export default async function EinreichenPage() {
             <p className="mt-1 text-sm text-zinc-500">
               Deine Einreichung landet nicht direkt in der Fragendatenbank, sondern wird erst nach
               Prüfung freigegeben.
+              {!user && " Du kannst auch als Gast einreichen."}
             </p>
           </div>
           <EinreichungForm />
-          <MeineEinreichungen einreichungen={einreichungen} />
+          {user && <MeineEinreichungen einreichungen={einreichungen} />}
         </div>
       </main>
     </div>

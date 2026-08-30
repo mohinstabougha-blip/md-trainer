@@ -11,7 +11,11 @@ export default async function MarktplatzLayout({ children }: { children: React.R
 
   return (
     <div className="min-h-screen bg-zinc-50 pb-20 sm:pb-0">
-      {user?.email && <AppHeader email={user.email} ungeleseneNachrichten={ungelesen} />}
+      <AppHeader
+        email={user?.email ?? undefined}
+        ungeleseneNachrichten={ungelesen}
+        istGast={!user}
+      />
       <main className="mx-auto max-w-2xl p-6">{children}</main>
     </div>
   );

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { getKonversationsVerlauf } from "@/lib/marktplatz";
 import { getAnzeigenamen } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
@@ -16,6 +17,7 @@ export default async function KonversationPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
   // Eingehende Nachrichten dieser Konversation beim Öffnen als gelesen markieren.
   await supabase

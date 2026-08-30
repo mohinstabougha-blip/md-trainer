@@ -7,7 +7,7 @@ import { getAlleFragenMeta } from "@/lib/questions";
 import { createClient } from "@/lib/supabase/server";
 import {
   getWartezeitDurchschnitt,
-  formatiereWartezeitText,
+  getWartezeitVerlauf,
   formatiereWartezeitBadge,
 } from "@/lib/wartezeit";
 import { getUngeleseneNachrichtenAnzahl } from "@/lib/marktplatz";
@@ -18,10 +18,12 @@ export default async function Home() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const istGast = !user;
 
   const [
     fragenMeta,
     wartezeitDurchschnitt,
+    wartezeitVerlauf,
     meineMeldungResult,
     ungeleseneNachrichten,
     modulFortschritt,
@@ -29,6 +31,7 @@ export default async function Home() {
   ] = await Promise.all([
     getAlleFragenMeta(),
     getWartezeitDurchschnitt(),
+    getWartezeitVerlauf(),
     user
       ? supabase.from("wartezeit_meldungen").select("*").eq("user_id", user.id).maybeSingle()
       : Promise.resolve({ data: null }),
@@ -39,7 +42,11 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 pb-20 sm:pb-0">
-      {user?.email && <AppHeader email={user.email} ungeleseneNachrichten={ungeleseneNachrichten} />}
+      <AppHeader
+        email={user?.email ?? undefined}
+        ungeleseneNachrichten={ungeleseneNachrichten}
+        istGast={istGast}
+      />
 
       <div className="mx-auto flex w-full max-w-xl items-center justify-between px-6 pt-4">
         <Link
@@ -51,16 +58,25 @@ export default async function Home() {
         </Link>
         <WartezeitBadge
           badgeText={formatiereWartezeitBadge(wartezeitDurchschnitt)}
-          detailText={formatiereWartezeitText(wartezeitDurchschnitt)}
+          verlauf={wartezeitVerlauf}
           initial={meineMeldungResult.data}
+          istGast={istGast}
         />
       </div>
 
       <div className="mx-auto w-full max-w-xl pt-4">
-        <FortschrittUebersicht stats={modulFortschritt} />
+        <FortschrittUebersicht
+          stats={modulFortschritt}
+          istGast={istGast}
+          alleFragen={fragenMeta}
+        />
       </div>
 
-      <StartScreen fragenMeta={fragenMeta} meineBewertungen={meineBewertungen} />
+      <StartScreen
+        fragenMeta={fragenMeta}
+        meineBewertungen={meineBewertungen}
+        istGast={istGast}
+      />
     </div>
   );
 }

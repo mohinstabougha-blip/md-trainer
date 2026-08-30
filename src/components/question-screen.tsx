@@ -7,6 +7,7 @@ import { FeedbackForm } from "@/components/feedback-form";
 import { AntwortKommentare } from "@/components/antwort-kommentare";
 import { MusterantwortText } from "@/components/musterantwort-text";
 import { FrageMenu } from "@/components/frage-menu";
+import { setGastBewertung } from "@/lib/gast-fortschritt";
 
 type MusterantwortResult = {
   musterantwort: string;
@@ -25,6 +26,7 @@ export function QuestionScreen({
   gesamt,
   sessionId,
   istAdmin,
+  istGast,
   ungeleseneNachrichten,
   onNext,
   onAbbrechen,
@@ -34,6 +36,7 @@ export function QuestionScreen({
   gesamt: number;
   sessionId: string;
   istAdmin: boolean;
+  istGast: boolean;
   ungeleseneNachrichten: number;
   onNext: (result: { antwort: string; bewertung: Bewertung | null }) => void;
   onAbbrechen: () => void;
@@ -41,6 +44,7 @@ export function QuestionScreen({
   const [antwort, setAntwort] = useState("");
   const [feedbackOffen, setFeedbackOffen] = useState(false);
   const [hilfeOffen, setHilfeOffen] = useState(false);
+  const [gedreht, setGedreht] = useState(false);
   const [status, setStatus] = useState<"eingabe" | "laden" | "musterantwort" | "fehler">(
     "eingabe"
   );
@@ -50,7 +54,9 @@ export function QuestionScreen({
   const [ausgewaehlteBewertung, setAusgewaehlteBewertung] = useState<Bewertung | null>(null);
   const [speichertBewertung, setSpeichertBewertung] = useState(false);
 
-  async function antwortAbschicken() {
+  const aufgedeckt = status === "musterantwort";
+
+  async function musterantwortLaden() {
     setStatus("laden");
     try {
       const res = await fetch("/api/musterantwort", {
@@ -67,9 +73,26 @@ export function QuestionScreen({
     }
   }
 
+  function karteDrehen() {
+    if (status === "laden") return;
+    const zeigeRueckseite = !gedreht;
+    setGedreht(zeigeRueckseite);
+    if (zeigeRueckseite && status === "eingabe") {
+      void musterantwortLaden();
+    }
+  }
+
   async function weiterKlick() {
     if (!ausgewaehlteBewertung) return;
     setSpeichertBewertung(true);
+
+    // Gast: Selbsteinschätzung nur lokal im Browser merken, nichts an den Server.
+    if (istGast) {
+      setGastBewertung(question.id, ausgewaehlteBewertung);
+      onNext({ antwort, bewertung: ausgewaehlteBewertung });
+      return;
+    }
+
     try {
       const res = await fetch("/api/selbstbewertung", {
         method: "POST",
@@ -98,7 +121,11 @@ export function QuestionScreen({
     <div className="relative mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-6 p-6 pb-10">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-3">
-          <FrageMenu istAdmin={istAdmin} ungeleseneNachrichten={ungeleseneNachrichten} />
+          <FrageMenu
+            istAdmin={istAdmin}
+            istGast={istGast}
+            ungeleseneNachrichten={ungeleseneNachrichten}
+          />
           <span className="text-sm text-zinc-500">
             Frage {index + 1} von {gesamt} · {question.modul} / {question.kurs} · Teil{" "}
             {question.teil}
@@ -123,19 +150,96 @@ export function QuestionScreen({
         </div>
       </div>
 
-      <div className="kp-card flex flex-col gap-4">
-        <p className="text-lg leading-relaxed">{question.frage}</p>
-        {question.bild_frage_url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={question.bild_frage_url}
-            alt="Bild zur Frage"
-            className="max-w-full rounded-xl"
-          />
-        )}
+      {/* Flashcard: Vorderseite = Frage, Rückseite = Musterantwort */}
+      <div className="[perspective:1400px]">
+        <div
+          className="relative min-h-[19rem] transition-transform duration-500 [transform-style:preserve-3d]"
+          style={{ transform: gedreht ? "rotateY(180deg)" : "rotateY(0deg)" }}
+        >
+          {/* Vorderseite */}
+          <div
+            role="button"
+            tabIndex={gedreht ? -1 : 0}
+            aria-hidden={gedreht}
+            onClick={karteDrehen}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                karteDrehen();
+              }
+            }}
+            className="kp-card absolute inset-0 flex cursor-pointer flex-col gap-4 overflow-y-auto [backface-visibility:hidden]"
+          >
+            <span className="text-xs font-medium uppercase tracking-wide text-zinc-400">Frage</span>
+            <p className="text-lg leading-relaxed">{question.frage}</p>
+            {question.bild_frage_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={question.bild_frage_url}
+                alt="Bild zur Frage"
+                className="max-w-full rounded-xl"
+              />
+            )}
+            <span className="mt-auto pt-2 text-sm text-accent">Tippen zum Umdrehen →</span>
+          </div>
+
+          {/* Rückseite */}
+          <div
+            role="button"
+            tabIndex={gedreht ? 0 : -1}
+            aria-hidden={!gedreht}
+            onClick={karteDrehen}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                karteDrehen();
+              }
+            }}
+            className="kp-card absolute inset-0 flex cursor-pointer flex-col gap-3 overflow-y-auto [backface-visibility:hidden] [transform:rotateY(180deg)]"
+          >
+            <span className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+              Musterantwort
+            </span>
+            {status === "laden" && (
+              <p className="text-sm text-zinc-500">Musterantwort wird geladen…</p>
+            )}
+            {status === "fehler" && (
+              <div className="flex flex-col items-start gap-2 text-sm text-red-700">
+                <span>Das hat nicht geklappt. Bitte versuch es nochmal.</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void musterantwortLaden();
+                  }}
+                  className="rounded-full bg-red-600 px-3 py-1.5 text-sm font-medium text-white"
+                >
+                  Erneut versuchen
+                </button>
+              </div>
+            )}
+            {aufgedeckt && musterantwortErgebnis && (
+              <>
+                <MusterantwortText
+                  text={musterantwortErgebnis.musterantwort}
+                  className="text-sm leading-relaxed"
+                />
+                {musterantwortErgebnis.bildAntwortUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={musterantwortErgebnis.bildAntwortUrl}
+                    alt="Bild zur Musterantwort"
+                    className="max-w-full rounded-xl"
+                  />
+                )}
+              </>
+            )}
+            <span className="mt-auto pt-2 text-sm text-accent">← Zurück zur Frage</span>
+          </div>
+        </div>
       </div>
 
-      {status === "eingabe" && question.hilfe_hinweis && (
+      {!gedreht && question.hilfe_hinweis && (
         <div>
           <button
             type="button"
@@ -152,61 +256,30 @@ export function QuestionScreen({
         </div>
       )}
 
-      <textarea
-        value={antwort}
-        onChange={(e) => setAntwort(e.target.value)}
-        readOnly={status !== "eingabe"}
-        placeholder="Deine Antwort…"
-        rows={8}
-        className="kp-input w-full resize-y p-4 leading-relaxed disabled:opacity-60"
-      />
+      <div className="flex flex-col gap-2">
+        <label className="text-sm text-zinc-500">Deine Antwort / Notizen (optional)</label>
+        <textarea
+          value={antwort}
+          onChange={(e) => setAntwort(e.target.value)}
+          placeholder="Kannst du nutzen, musst du aber nicht – die Selbsteinschätzung geht auch ohne."
+          rows={6}
+          className="kp-input w-full resize-y p-4 leading-relaxed"
+        />
+      </div>
 
-      {status === "eingabe" && (
+      {!aufgedeckt && (
         <button
           type="button"
-          disabled={antwort.trim() === ""}
-          onClick={antwortAbschicken}
+          onClick={karteDrehen}
+          disabled={status === "laden"}
           className="kp-btn-primary py-3.5"
         >
-          Musterantwort anzeigen
+          {status === "laden" ? "Musterantwort wird geladen…" : "Musterantwort aufdecken"}
         </button>
       )}
 
-      {status === "laden" && (
-        <div className="kp-card text-center text-sm text-zinc-500">Musterantwort wird geladen…</div>
-      )}
-
-      {status === "fehler" && (
-        <div className="flex flex-col gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">
-          <span>Das hat nicht geklappt. Bitte versuch es nochmal.</span>
-          <button
-            type="button"
-            onClick={antwortAbschicken}
-            className="self-start rounded-full bg-red-600 px-3 py-1.5 text-sm font-medium text-white"
-          >
-            Erneut versuchen
-          </button>
-        </div>
-      )}
-
-      {status === "musterantwort" && musterantwortErgebnis && (
+      {aufgedeckt && musterantwortErgebnis && (
         <div className="flex flex-col gap-4">
-          <div className="kp-card flex flex-col gap-2">
-            <h3 className="text-sm font-medium text-zinc-500">Musterantwort</h3>
-            <MusterantwortText
-              text={musterantwortErgebnis.musterantwort}
-              className="text-sm leading-relaxed"
-            />
-            {musterantwortErgebnis.bildAntwortUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={musterantwortErgebnis.bildAntwortUrl}
-                alt="Bild zur Musterantwort"
-                className="max-w-full rounded-xl"
-              />
-            )}
-          </div>
-
           <div className="kp-card flex flex-col gap-3">
             <h3 className="text-sm font-medium text-zinc-500">
               Wie hast du im Vergleich zur Musterantwort abgeschnitten?
@@ -230,7 +303,7 @@ export function QuestionScreen({
             </div>
           </div>
 
-          <AntwortKommentare questionId={question.id} />
+          <AntwortKommentare questionId={question.id} istGast={istGast} />
 
           <button
             type="button"

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 
 const GUELTIGE_KATEGORIEN = ["simulation_kostenlos", "kurs_kostenpflichtig", "buch", "sonstiges"];
 
@@ -9,6 +10,10 @@ export async function POST(request: Request) {
   const titel = body?.titel;
   const beschreibung = body?.beschreibung;
   const preis = body?.preis;
+
+  if (!(await verifyTurnstile(body?.turnstileToken, clientIp(request)))) {
+    return NextResponse.json({ error: "Bot-Schutz fehlgeschlagen" }, { status: 403 });
+  }
 
   if (!GUELTIGE_KATEGORIEN.includes(kategorie)) {
     return NextResponse.json({ error: "ungültige Kategorie" }, { status: 400 });

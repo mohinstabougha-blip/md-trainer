@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTurnstile } from "@/components/turnstile-widget";
 
 const TYPEN = [
   { value: "frage_fehlerhaft", label: "Frage fehlerhaft" },
@@ -19,19 +20,21 @@ export function FeedbackForm({
   const [typ, setTyp] = useState<(typeof TYPEN)[number]["value"]>("frage_fehlerhaft");
   const [kommentar, setKommentar] = useState("");
   const [status, setStatus] = useState<"idle" | "senden" | "gesendet" | "fehler">("idle");
+  const { token, widget, reset, erforderlich } = useTurnstile();
 
   async function melden() {
     setStatus("senden");
     const res = await fetch("/api/feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ questionId, typ, kommentar }),
+      body: JSON.stringify({ questionId, typ, kommentar, turnstileToken: token }),
     });
     if (res.ok) {
       setStatus("gesendet");
       setTimeout(onClose, 1200);
     } else {
       setStatus("fehler");
+      reset();
     }
   }
 
@@ -71,6 +74,7 @@ export function FeedbackForm({
                 Melden fehlgeschlagen. Bitte versuch es nochmal.
               </p>
             )}
+            <div className="mt-3">{widget}</div>
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
@@ -82,7 +86,7 @@ export function FeedbackForm({
               <button
                 type="button"
                 onClick={melden}
-                disabled={status === "senden"}
+                disabled={status === "senden" || (erforderlich && !token)}
                 className="kp-btn-primary py-1.5"
               >
                 Melden

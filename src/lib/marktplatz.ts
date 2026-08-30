@@ -16,6 +16,21 @@ export async function getAngeboteFuerUebersicht(userId: string): Promise<Angebot
   return data;
 }
 
+/** Nur Titel + Kategorie aktiver Angebote — für die Gast-Ansicht (kein Zugriff
+ *  auf Beschreibung, Anbieter oder Kontakt). */
+export async function getAngebotsTitelFuerGaeste(): Promise<
+  Pick<Angebot, "id" | "titel" | "kategorie">[]
+> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("angebote")
+    .select("id, titel, kategorie")
+    .eq("status", "aktiv")
+    .order("erstellt_am", { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
 export async function getAngebot(id: number): Promise<Angebot | null> {
   const supabase = await createClient();
   const { data, error } = await supabase.from("angebote").select("*").eq("id", id).maybeSingle();

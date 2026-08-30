@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Einreichung } from "@/lib/einreichungen-types";
 import { QUELLE_LABEL } from "@/lib/einreichungen-types";
+import { useZeilenAuswahl } from "@/components/admin/use-zeilen-auswahl";
 import { BildFeld } from "@/components/admin/bild-feld";
 
 function EinreichungKarte({ e, namen }: { e: Einreichung; namen: Record<string, string> }) {
@@ -67,7 +68,7 @@ function EinreichungKarte({ e, namen }: { e: Einreichung; namen: Record<string, 
   const gueltig = modul.trim() && kurs.trim() && frage.trim() && musterantwort.trim();
 
   return (
-    <div className="kp-card flex flex-col gap-3">
+    <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between text-sm text-zinc-500">
         <div className="flex items-center gap-2">
           <span>{e.typ === "einzelfrage" ? "Einzelfrage" : "Protokoll"}</span>
@@ -90,7 +91,7 @@ function EinreichungKarte({ e, namen }: { e: Einreichung; namen: Record<string, 
       </div>
 
       {e.protokoll_text && (
-        <div className="rounded-xl bg-zinc-50 p-3 text-sm">
+        <div className="rounded-xl bg-white p-3 text-sm">
           <p className="mb-1 text-xs font-medium text-zinc-500">Eingereichter Protokoll-Text:</p>
           <p className="whitespace-pre-wrap text-zinc-700">{e.protokoll_text}</p>
         </div>
@@ -173,22 +174,358 @@ function EinreichungKarte({ e, namen }: { e: Einreichung; namen: Record<string, 
   );
 }
 
+type BulkAktion = "modul" | "freigeben" | "ablehnen";
+
 export function EinreichungenListe({
   einreichungen,
   namen,
+  alleModule,
 }: {
   einreichungen: Einreichung[];
   namen: Record<string, string>;
+  alleModule: string[];
 }) {
+  const router = useRouter();
+  const [offeneId, setOffeneId] = useState<number | null>(null);
+  const [bulkModul, setBulkModul] = useState("");
+  const [bulkKommentar, setBulkKommentar] = useState("");
+  const [bulkLaeuft, setBulkLaeuft] = useState<BulkAktion | null>(null);
+  const [bulkFehler, setBulkFehler] = useState<string | null>(null);
+  const [bulkInfo, setBulkInfo] = useState<string | null>(null);
+  const [suche, setSuche] = useState("");
+  const [modulFilter, setModulFilter] = useState("");
+  const [kursFilter, setKursFilter] = useState("");
+  const [teilFilter, setTeilFilter] = useState("");
+  const [quelleFilter, setQuelleFilter] = useState("");
+
+  const alleModulnamen = [
+    ...new Set(einreichungen.map((e) => e.modul).filter((m): m is string => !!m)),
+  ].sort((a, b) => a.localeCompare(b, "de"));
+  const alleKursnamen = [
+    ...new Set(
+      einreichungen
+        .filter((e) => !modulFilter || e.modul === modulFilter)
+        .map((e) => e.kurs)
+        .filter((k): k is string => !!k)
+    ),
+  ].sort((a, b) => a.localeCompare(b, "de"));
+
+  const gefiltert = einreichungen.filter((e) => {
+    if (modulFilter && e.modul !== modulFilter) return false;
+    if (kursFilter && e.kurs !== kursFilter) return false;
+    if (teilFilter && String(e.teil) !== teilFilter) return false;
+    if (quelleFilter && e.quelle_typ !== quelleFilter) return false;
+    if (suche) {
+      const q = suche.toLowerCase();
+      const heu = `${e.frage ?? ""} ${e.modul ?? ""} ${e.kurs ?? ""} ${e.antwort_vorschlag ?? ""} ${e.protokoll_text ?? ""}`.toLowerCase();
+      if (!heu.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const { ausgewaehlt, setAusgewaehlt, zeileMausRunter, zeileMausRein, alleUmschalten } =
+    useZeilenAuswahl(gefiltert.map((e) => e.id));
+
   if (einreichungen.length === 0) {
     return <p className="text-sm text-zinc-500">Keine offenen Einreichungen.</p>;
   }
 
+  const alleAusgewaehlt =
+    gefiltert.length > 0 && gefiltert.every((e) => ausgewaehlt.has(e.id));
+
+  async function bulkAktion(aktion: BulkAktion) {
+    const ids = [...ausgewaehlt];
+    if (ids.length === 0) return;
+    if (aktion === "modul" && !bulkModul.trim()) return;
+
+    const frage =
+      aktion === "modul"
+        ? `Modul von ${ids.length} Einreichung(en) auf „${bulkModul.trim()}" ändern?`
+        : aktion === "freigeben"
+          ? `${ids.length} Einreichung(en) freigeben und in die Fragendatenbank übernehmen?`
+          : `${ids.length} Einreichung(en) ablehnen?`;
+    if (!confirm(frage)) return;
+
+    setBulkLaeuft(aktion);
+    setBulkFehler(null);
+    setBulkInfo(null);
+    const res = await fetch("/api/admin/einreichungen/bulk", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        aktion,
+        ids,
+        modul: aktion === "modul" ? bulkModul.trim() : undefined,
+        adminKommentar: aktion === "ablehnen" ? bulkKommentar.trim() || undefined : undefined,
+      }),
+    });
+    setBulkLaeuft(null);
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      setBulkFehler(data?.error ?? "Aktion fehlgeschlagen");
+      return;
+    }
+
+    const data = await res.json().catch(() => null);
+    if (aktion === "freigeben") {
+      const uebersprungen = data?.uebersprungen?.length ?? 0;
+      setBulkInfo(
+        `${data?.freigegeben ?? 0} freigegeben` +
+          (uebersprungen > 0 ? `, ${uebersprungen} übersprungen (Pflichtfelder fehlen)` : "")
+      );
+    } else if (aktion === "modul") {
+      setBulkInfo(`${data?.aktualisiert ?? 0} Einreichung(en) aktualisiert`);
+    } else {
+      setBulkInfo(`${data?.abgelehnt ?? 0} Einreichung(en) abgelehnt`);
+    }
+    setAusgewaehlt(new Set());
+    setBulkModul("");
+    setBulkKommentar("");
+    router.refresh();
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      {einreichungen.map((e) => (
-        <EinreichungKarte key={e.id} e={e} namen={namen} />
-      ))}
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          value={suche}
+          onChange={(e) => setSuche(e.target.value)}
+          placeholder="Suche in Frage/Modul/Kurs/Musterantwort…"
+          className="kp-input flex-1"
+        />
+        <select
+          value={modulFilter}
+          onChange={(e) => {
+            setModulFilter(e.target.value);
+            setKursFilter("");
+          }}
+          className="kp-input"
+        >
+          <option value="">Alle Module</option>
+          {alleModulnamen.map((m) => (
+            <option key={m} value={m}>
+              {m}
+            </option>
+          ))}
+        </select>
+        <select
+          value={kursFilter}
+          onChange={(e) => setKursFilter(e.target.value)}
+          className="kp-input"
+        >
+          <option value="">Alle Kurse</option>
+          {alleKursnamen.map((k) => (
+            <option key={k} value={k}>
+              {k}
+            </option>
+          ))}
+        </select>
+        <select
+          value={teilFilter}
+          onChange={(e) => setTeilFilter(e.target.value)}
+          className="kp-input"
+        >
+          <option value="">Alle Teile</option>
+          <option value="1">Teil 1</option>
+          <option value="2">Teil 2</option>
+          <option value="3">Teil 3</option>
+        </select>
+        <select
+          value={quelleFilter}
+          onChange={(e) => setQuelleFilter(e.target.value)}
+          className="kp-input"
+        >
+          <option value="">Alle Quellen</option>
+          <option value="nutzer">Nutzer</option>
+          <option value="telegram">Telegram</option>
+        </select>
+        {(suche || modulFilter || kursFilter || teilFilter || quelleFilter) && (
+          <button
+            type="button"
+            onClick={() => {
+              setSuche("");
+              setModulFilter("");
+              setKursFilter("");
+              setTeilFilter("");
+              setQuelleFilter("");
+            }}
+            className="text-sm text-accent hover:underline"
+          >
+            Filter zurücksetzen
+          </button>
+        )}
+        <span className="text-sm text-zinc-500">
+          {gefiltert.length} von {einreichungen.length}
+          {ausgewaehlt.size > 0 && `, ${ausgewaehlt.size} ausgewählt`}
+        </span>
+      </div>
+
+      {ausgewaehlt.size > 0 && (
+        <div className="flex flex-col gap-2 rounded-xl bg-accent/10 px-3 py-2 text-sm">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-medium">{ausgewaehlt.size} ausgewählt</span>
+            <span className="text-xs text-zinc-500">(Tipp: über die Kästchen ziehen wählt mehrere auf einmal)</span>
+
+            <span className="ml-2 text-zinc-500">Modul →</span>
+            <input
+              list="admin-einreichung-module"
+              value={bulkModul}
+              onChange={(e) => setBulkModul(e.target.value)}
+              placeholder="Modulname"
+              className="kp-input py-1"
+            />
+            <datalist id="admin-einreichung-module">
+              {alleModule.map((m) => (
+                <option key={m} value={m} />
+              ))}
+            </datalist>
+            <button
+              type="button"
+              disabled={!bulkModul.trim() || bulkLaeuft !== null}
+              onClick={() => bulkAktion("modul")}
+              className="kp-btn-secondary py-1.5"
+            >
+              {bulkLaeuft === "modul" ? "…" : "Modul ändern"}
+            </button>
+
+            <span className="mx-1 h-5 w-px bg-zinc-300" />
+
+            <button
+              type="button"
+              disabled={bulkLaeuft !== null}
+              onClick={() => bulkAktion("freigeben")}
+              className="kp-btn-primary py-1.5"
+            >
+              {bulkLaeuft === "freigeben" ? "Gebe frei…" : "Freigeben"}
+            </button>
+            <button
+              type="button"
+              disabled={bulkLaeuft !== null}
+              onClick={() => bulkAktion("ablehnen")}
+              className="rounded-full border border-red-300 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 disabled:opacity-40"
+            >
+              {bulkLaeuft === "ablehnen" ? "Lehne ab…" : "Ablehnen"}
+            </button>
+            <input
+              value={bulkKommentar}
+              onChange={(e) => setBulkKommentar(e.target.value)}
+              placeholder="Ablehnungsgrund (optional)"
+              className="kp-input py-1"
+            />
+
+            <button
+              type="button"
+              onClick={() => setAusgewaehlt(new Set())}
+              className="ml-auto text-zinc-600 hover:underline"
+            >
+              Auswahl aufheben
+            </button>
+          </div>
+          {bulkFehler && <span className="text-red-600">{bulkFehler}</span>}
+        </div>
+      )}
+
+      {bulkInfo && ausgewaehlt.size === 0 && (
+        <p className="rounded-xl bg-green-50 px-3 py-2 text-sm text-green-700">{bulkInfo}</p>
+      )}
+
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-zinc-50">
+            <tr>
+              <th className="w-10 px-3 py-2">
+                <input
+                  type="checkbox"
+                  checked={alleAusgewaehlt}
+                  onChange={alleUmschalten}
+                  aria-label="Alle Einreichungen auswählen"
+                />
+              </th>
+              <th className="px-3 py-2">Modul</th>
+              <th className="px-3 py-2">Kurs</th>
+              <th className="w-14 px-3 py-2">Teil</th>
+              <th className="px-3 py-2">Frage</th>
+              <th className="px-3 py-2">Quelle</th>
+              <th className="w-24 px-3 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {gefiltert.length === 0 && (
+              <tr className="border-t border-zinc-100">
+                <td colSpan={7} className="px-3 py-6 text-center text-sm text-zinc-500">
+                  Keine Einreichung passt zu den Filtern.
+                </td>
+              </tr>
+            )}
+            {gefiltert.map((e, index) => {
+              const offen = offeneId === e.id;
+              return (
+                <Fragment key={e.id}>
+                  <tr
+                    className={`border-t border-zinc-100 ${ausgewaehlt.has(e.id) ? "bg-accent/5" : ""}`}
+                  >
+                    <td
+                      className="cursor-pointer select-none px-3 py-2 align-top"
+                      onMouseDown={(ev) => {
+                        ev.preventDefault();
+                        zeileMausRunter(index, ev.shiftKey);
+                      }}
+                      onMouseEnter={() => zeileMausRein(index)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={ausgewaehlt.has(e.id)}
+                        readOnly
+                        tabIndex={-1}
+                        aria-label={`Einreichung ${e.id} auswählen`}
+                        className="pointer-events-none"
+                      />
+                    </td>
+                    <td className="max-w-[150px] truncate px-3 py-2 align-top">{e.modul ?? "—"}</td>
+                    <td className="max-w-[200px] truncate px-3 py-2 align-top">{e.kurs ?? "—"}</td>
+                    <td className="px-3 py-2 align-top">{e.teil ?? "—"}</td>
+                    <td className="max-w-[360px] truncate px-3 py-2 align-top">
+                      {e.typ === "protokoll" && !e.frage ? (
+                        <span className="text-zinc-400">(Protokoll)</span>
+                      ) : (
+                        e.frage
+                      )}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 align-top">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                          e.quelle_typ === "telegram"
+                            ? "bg-sky-100 text-sky-700"
+                            : "bg-zinc-100 text-zinc-600"
+                        }`}
+                      >
+                        {QUELLE_LABEL[e.quelle_typ]}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-right align-top">
+                      <button
+                        type="button"
+                        onClick={() => setOffeneId(offen ? null : e.id)}
+                        className="text-sm text-accent hover:underline"
+                      >
+                        {offen ? "Schließen" : "Bearbeiten"}
+                      </button>
+                    </td>
+                  </tr>
+                  {offen && (
+                    <tr className="border-t border-zinc-100 bg-zinc-50">
+                      <td colSpan={7} className="px-3 py-3">
+                        <EinreichungKarte e={e} namen={namen} />
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 declare global {
   interface Window {
@@ -95,4 +95,27 @@ export function TurnstileWidget({
   if (!siteKey) return null;
 
   return <div ref={containerRef} className="flex justify-center" />;
+}
+
+/**
+ * Bequemer Wrapper für Formulare: liefert das fertige Widget, den aktuellen
+ * Token, eine reset()-Funktion (nach fehlgeschlagenem Absenden aufrufen) und ob
+ * ein Token verpflichtend ist (nur wenn ein Site-Key konfiguriert ist).
+ */
+export function useTurnstile() {
+  const [token, setToken] = useState<string | null>(null);
+  const [resetSignal, setResetSignal] = useState(0);
+  const erforderlich = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
+
+  const reset = useCallback(() => {
+    setToken(null);
+    setResetSignal((n) => n + 1);
+  }, []);
+
+  const widget = useMemo(
+    () => <TurnstileWidget onToken={setToken} resetSignal={resetSignal} />,
+    [resetSignal]
+  );
+
+  return { token, widget, reset, erforderlich };
 }

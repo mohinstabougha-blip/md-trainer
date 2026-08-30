@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { KATEGORIE_LABEL, type AngebotKategorie } from "@/lib/marktplatz-types";
+import { useTurnstile } from "@/components/turnstile-widget";
 
 export function AngebotForm() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export function AngebotForm() {
   const [preis, setPreis] = useState("");
   const [speichert, setSpeichert] = useState(false);
   const [fehler, setFehler] = useState<string | null>(null);
+  const { token, widget, reset, erforderlich } = useTurnstile();
 
   const gueltig = titel.trim() !== "" && beschreibung.trim() !== "";
 
@@ -21,7 +23,7 @@ export function AngebotForm() {
     const res = await fetch("/api/marktplatz/angebote", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kategorie, titel, beschreibung, preis }),
+      body: JSON.stringify({ kategorie, titel, beschreibung, preis, turnstileToken: token }),
     });
     setSpeichert(false);
     if (res.ok) {
@@ -29,6 +31,7 @@ export function AngebotForm() {
       router.push(`/marktplatz/${data.id}`);
       router.refresh();
     } else {
+      reset();
       const data = await res.json().catch(() => null);
       setFehler(data?.error ?? "Speichern fehlgeschlagen");
     }
@@ -80,7 +83,14 @@ export function AngebotForm() {
 
       {fehler && <p className="text-sm text-red-600">{fehler}</p>}
 
-      <button type="button" disabled={!gueltig || speichert} onClick={speichern} className="kp-btn-primary w-fit">
+      {widget}
+
+      <button
+        type="button"
+        disabled={!gueltig || speichert || (erforderlich && !token)}
+        onClick={speichern}
+        className="kp-btn-primary w-fit"
+      >
         Angebot veröffentlichen
       </button>
     </div>

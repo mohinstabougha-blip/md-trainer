@@ -1,9 +1,11 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { ModulFortschritt } from "@/lib/fortschritt";
+import type { FrageMeta } from "@/lib/questions";
 import { FortschrittRing } from "@/components/fortschritt-ring";
+import { getGastBewertungen } from "@/lib/gast-fortschritt";
 
 function ChevronIcon({ richtung }: { richtung: "links" | "rechts" }) {
   return (
@@ -22,10 +24,48 @@ function ChevronIcon({ richtung }: { richtung: "links" | "rechts" }) {
   );
 }
 
-export function FortschrittUebersicht({ stats }: { stats: ModulFortschritt[] }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+/** Modul-Statistik aus den lokal gespeicherten Gast-Bewertungen bauen. */
+function gastStats(alleFragen: FrageMeta[]): ModulFortschritt[] {
+  const bewertungen = getGastBewertungen();
+  const map = new Map<string, ModulFortschritt>();
+  for (const f of alleFragen) {
+    const stat =
+      map.get(f.modul) ??
+      { modul: f.modul, gesamt: 0, bearbeitet: 0, richtig: 0, teilweise: 0, falsch: 0 };
+    stat.gesamt += 1;
+    const b = bewertungen[f.id];
+    if (b) {
+      stat.bearbeitet += 1;
+      stat[b] += 1;
+    }
+    map.set(f.modul, stat);
+  }
+  return [...map.values()].sort((a, b) => a.modul.localeCompare(b.modul, "de"));
+}
 
-  if (stats.length === 0) return null;
+export function FortschrittUebersicht({
+  stats,
+  istGast = false,
+  alleFragen = [],
+}: {
+  stats: ModulFortschritt[];
+  istGast?: boolean;
+  alleFragen?: FrageMeta[];
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  // Gast: erst nach dem Mounten aus localStorage füllen (SSR kennt es nicht).
+  const [gastFortschritt, setGastFortschritt] = useState<ModulFortschritt[] | null>(null);
+
+  // localStorage ist beim SSR nicht verfügbar -> Gast-Fortschritt erst nach dem
+  // Mounten aus dem Browser lesen.
+  useEffect(() => {
+    /* eslint-disable-next-line react-hooks/set-state-in-effect */
+    if (istGast) setGastFortschritt(gastStats(alleFragen));
+  }, [istGast, alleFragen]);
+
+  const anzeige = istGast ? (gastFortschritt ?? []) : stats;
+
+  if (anzeige.length === 0) return null;
 
   function scrollen(richtung: "links" | "rechts") {
     scrollRef.current?.scrollBy({ left: richtung === "links" ? -240 : 240, behavior: "smooth" });
@@ -46,7 +86,7 @@ export function FortschrittUebersicht({ stats }: { stats: ModulFortschritt[] }) 
         ref={scrollRef}
         className="scrollbar-hide flex gap-5 overflow-x-auto scroll-smooth px-6 pb-2 sm:px-11"
       >
-        {stats.map((stat) => (
+        {anzeige.map((stat) => (
           <Link
             key={stat.modul}
             href={`/session?modus=modul&module=${encodeURIComponent(stat.modul)}&teil=voll&sortierung=haeufigste`}

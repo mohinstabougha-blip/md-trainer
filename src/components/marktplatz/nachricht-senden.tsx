@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTurnstile } from "@/components/turnstile-widget";
 
 export function NachrichtSenden({ angebotId, anUserId }: { angebotId: number; anUserId: string }) {
   const router = useRouter();
@@ -9,6 +10,7 @@ export function NachrichtSenden({ angebotId, anUserId }: { angebotId: number; an
   const [text, setText] = useState("");
   const [sendet, setSendet] = useState(false);
   const [fehler, setFehler] = useState<string | null>(null);
+  const { token, widget, reset, erforderlich } = useTurnstile();
 
   async function absenden() {
     setSendet(true);
@@ -16,12 +18,13 @@ export function NachrichtSenden({ angebotId, anUserId }: { angebotId: number; an
     const res = await fetch("/api/marktplatz/nachrichten", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ angebotId, anUserId, text }),
+      body: JSON.stringify({ angebotId, anUserId, text, turnstileToken: token }),
     });
     setSendet(false);
     if (res.ok) {
       router.push(`/marktplatz/nachrichten/${angebotId}/${anUserId}`);
     } else {
+      reset();
       const data = await res.json().catch(() => null);
       setFehler(data?.error ?? "Senden fehlgeschlagen");
     }
@@ -45,10 +48,11 @@ export function NachrichtSenden({ angebotId, anUserId }: { angebotId: number; an
         className="kp-input"
       />
       {fehler && <p className="text-sm text-red-600">{fehler}</p>}
+      {widget}
       <div className="flex gap-2">
         <button
           type="button"
-          disabled={sendet || text.trim() === ""}
+          disabled={sendet || text.trim() === "" || (erforderlich && !token)}
           onClick={absenden}
           className="kp-btn-primary py-1.5"
         >

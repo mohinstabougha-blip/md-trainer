@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { EinreichungTyp } from "@/lib/einreichungen-types";
+import { useTurnstile } from "@/components/turnstile-widget";
 
 export function EinreichungForm() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export function EinreichungForm() {
   const [sendet, setSendet] = useState(false);
   const [fehler, setFehler] = useState<string | null>(null);
   const [gesendet, setGesendet] = useState(false);
+  const { token, widget, reset, erforderlich } = useTurnstile();
 
   const gueltig =
     typ === "einzelfrage"
@@ -27,8 +29,8 @@ export function EinreichungForm() {
     setFehler(null);
     const body =
       typ === "einzelfrage"
-        ? { typ, modul, kurs, teil, frage, antwortVorschlag }
-        : { typ, protokollText };
+        ? { typ, modul, kurs, teil, frage, antwortVorschlag, turnstileToken: token }
+        : { typ, protokollText, turnstileToken: token };
 
     const res = await fetch("/api/einreichungen", {
       method: "POST",
@@ -36,6 +38,7 @@ export function EinreichungForm() {
       body: JSON.stringify(body),
     });
     setSendet(false);
+    if (!res.ok) reset();
     if (res.ok) {
       setModul("");
       setKurs("");
@@ -125,7 +128,14 @@ export function EinreichungForm() {
         <p className="text-sm text-green-700">Danke! Deine Einreichung wird geprüft.</p>
       )}
 
-      <button type="button" disabled={!gueltig || sendet} onClick={absenden} className="kp-btn-primary w-fit">
+      {widget}
+
+      <button
+        type="button"
+        disabled={!gueltig || sendet || (erforderlich && !token)}
+        onClick={absenden}
+        className="kp-btn-primary w-fit"
+      >
         Einreichen
       </button>
     </div>

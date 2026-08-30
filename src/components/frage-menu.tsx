@@ -5,9 +5,11 @@ import Link from "next/link";
 
 export function FrageMenu({
   istAdmin,
+  istGast = false,
   ungeleseneNachrichten,
 }: {
   istAdmin: boolean;
+  istGast?: boolean;
   ungeleseneNachrichten: number;
 }) {
   const [offen, setOffen] = useState(false);
@@ -33,13 +35,15 @@ export function FrageMenu({
             >
               Zurück zur Trainer-Hauptseite
             </Link>
-            <Link
-              href="/marktplatz/nachrichten"
-              className="rounded-xl px-3 py-2 hover:bg-zinc-100"
-              onClick={() => setOffen(false)}
-            >
-              Nachrichten{ungeleseneNachrichten > 0 && ` (${ungeleseneNachrichten})`}
-            </Link>
+            {!istGast && (
+              <Link
+                href="/marktplatz/nachrichten"
+                className="rounded-xl px-3 py-2 hover:bg-zinc-100"
+                onClick={() => setOffen(false)}
+              >
+                Nachrichten{ungeleseneNachrichten > 0 && ` (${ungeleseneNachrichten})`}
+              </Link>
+            )}
             <Link
               href="/marktplatz"
               className="rounded-xl px-3 py-2 hover:bg-zinc-100"
@@ -47,13 +51,23 @@ export function FrageMenu({
             >
               Marktplatz
             </Link>
-            <Link
-              href="/einstellungen"
-              className="rounded-xl px-3 py-2 hover:bg-zinc-100"
-              onClick={() => setOffen(false)}
-            >
-              Profil/Einstellungen
-            </Link>
+            {istGast ? (
+              <Link
+                href="/login"
+                className="rounded-xl px-3 py-2 font-medium text-accent hover:bg-zinc-100"
+                onClick={() => setOffen(false)}
+              >
+                Anmelden / Registrieren
+              </Link>
+            ) : (
+              <Link
+                href="/einstellungen"
+                className="rounded-xl px-3 py-2 hover:bg-zinc-100"
+                onClick={() => setOffen(false)}
+              >
+                Profil/Einstellungen
+              </Link>
+            )}
             {istAdmin && (
               <Link
                 href="/admin/fragen"

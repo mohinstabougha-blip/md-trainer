@@ -1,0 +1,28 @@
+# KP Baden – Inhalte sind nur nach Anmeldung zugänglich und nicht zur
+# Indexierung/Weiterverwendung durch Crawler bestimmt.
+User-agent: *
+Disallow: /
+Allow: /about
+Allow: /login
+Allow: /datenschutz
+Allow: /impressum
+
+# KI-/Scraping-Bots ausdrücklich ausschließen
+User-agent: GPTBot
+Disallow: /
+User-agent: CCBot
+Disallow: /
+User-agent: ClaudeBot
+Disallow: /
+User-agent: Claude-Web
+Disallow: /
+User-agent: anthropic-ai
+Disallow: /
+User-agent: Google-Extended
+Disallow: /
+User-agent: PerplexityBot
+Disallow: /
+User-agent: Bytespider
+Disallow: /
+User-agent: Amazonbot
+Disallow: /

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AbmeldenButton } from "@/components/abmelden-button";
+import { Logo, LogoMark } from "@/components/logo";
 
 function IconHome({ aktiv }: { aktiv: boolean }) {
   return (
@@ -78,10 +79,12 @@ function IconUser({ aktiv }: { aktiv: boolean }) {
 
 export function AppHeader({
   email,
-  ungeleseneNachrichten,
+  ungeleseneNachrichten = 0,
+  istGast = false,
 }: {
-  email: string;
-  ungeleseneNachrichten: number;
+  email?: string;
+  ungeleseneNachrichten?: number;
+  istGast?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -101,8 +104,8 @@ export function AppHeader({
       {/* Desktop: klare Top-Leiste mit Textlinks */}
       <header className="hidden border-b border-zinc-100 bg-white px-6 py-3 text-sm sm:flex sm:items-center sm:justify-between sm:gap-3">
         <nav className="flex items-center gap-5">
-          <Link href="/" className="mr-1 text-base font-semibold tracking-tight text-accent">
-            KP-Trainer
+          <Link href="/" className="mr-1">
+            <Logo size={24} />
           </Link>
           <Link href="/" className={desktopLinkKlasse(homeAktiv)}>
             Training
@@ -110,39 +113,63 @@ export function AppHeader({
           <Link href="/marktplatz" className={desktopLinkKlasse(marktplatzAktiv)}>
             Marktplatz
           </Link>
-          <Link
-            href="/marktplatz/nachrichten"
-            className={desktopLinkKlasse(nachrichtenAktiv)}
-          >
-            Nachrichten{ungeleseneNachrichten > 0 && ` (${ungeleseneNachrichten})`}
-          </Link>
+          {!istGast && (
+            <Link
+              href="/marktplatz/nachrichten"
+              className={desktopLinkKlasse(nachrichtenAktiv)}
+            >
+              Nachrichten{ungeleseneNachrichten > 0 && ` (${ungeleseneNachrichten})`}
+            </Link>
+          )}
           <Link href="/einreichen" className={desktopLinkKlasse(pathname === "/einreichen")}>
             Einreichen
           </Link>
-        </nav>
-        <div className="flex items-center gap-3 text-zinc-500">
-          <span>{email}</span>
-          <Link href="/einstellungen" className={desktopLinkKlasse(profilAktiv)}>
-            Einstellungen
+          <Link href="/about" className={desktopLinkKlasse(pathname === "/about")}>
+            Über
           </Link>
-          <AbmeldenButton className="hover:text-zinc-900" />
-        </div>
+        </nav>
+        {istGast ? (
+          <Link
+            href="/login"
+            className="rounded-full bg-accent px-4 py-1.5 font-medium text-white hover:opacity-90"
+          >
+            Anmelden / Registrieren
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3 text-zinc-500">
+            {email && <span>{email}</span>}
+            <Link href="/einstellungen" className={desktopLinkKlasse(profilAktiv)}>
+              Einstellungen
+            </Link>
+            <AbmeldenButton className="hover:text-zinc-900" />
+          </div>
+        )}
       </header>
 
-      {/* Mobile: schlanke Kopfzeile (Profil-Icon statt Abmelden-Text — Abmelden
-          liegt jetzt auf der Einstellungen-Seite) + Bottom-Navigation mit den
-          drei Hauptpunkten statt Hamburger-Menü. */}
+      {/* Mobile: schlanke Kopfzeile + Bottom-Navigation mit den Hauptpunkten. */}
       <header className="flex items-center justify-between border-b border-zinc-100 bg-white px-5 py-3 sm:hidden">
-        <span className="text-base font-semibold tracking-tight text-accent">KP-Trainer</span>
-        <Link
-          href="/einstellungen"
-          aria-label="Profil/Einstellungen"
-          className={`flex h-8 w-8 items-center justify-center rounded-full ${
-            profilAktiv ? "bg-accent/10 text-accent" : "text-zinc-500"
-          }`}
-        >
-          <IconUser aktiv={profilAktiv} />
-        </Link>
+        <span className="flex items-center gap-2">
+          <LogoMark size={22} />
+          <span className="text-base font-semibold tracking-tight text-accent">KP Baden</span>
+        </span>
+        {istGast ? (
+          <Link
+            href="/login"
+            className="rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-white"
+          >
+            Anmelden
+          </Link>
+        ) : (
+          <Link
+            href="/einstellungen"
+            aria-label="Profil/Einstellungen"
+            className={`flex h-8 w-8 items-center justify-center rounded-full ${
+              profilAktiv ? "bg-accent/10 text-accent" : "text-zinc-500"
+            }`}
+          >
+            <IconUser aktiv={profilAktiv} />
+          </Link>
+        )}
       </header>
       <nav
         aria-label="Hauptnavigation"
@@ -157,20 +184,32 @@ export function AppHeader({
           <IconHome aktiv={homeAktiv} />
           Home
         </Link>
-        <Link
-          href="/marktplatz/nachrichten"
-          className={`relative flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] ${
-            nachrichtenAktiv ? "text-accent" : "text-zinc-500"
-          }`}
-        >
-          <IconInbox aktiv={nachrichtenAktiv} />
-          Nachrichten
-          {ungeleseneNachrichten > 0 && (
-            <span className="absolute right-[22%] top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
-              {ungeleseneNachrichten}
-            </span>
-          )}
-        </Link>
+        {istGast ? (
+          <Link
+            href="/einreichen"
+            className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] ${
+              pathname === "/einreichen" ? "text-accent" : "text-zinc-500"
+            }`}
+          >
+            <IconInbox aktiv={pathname === "/einreichen"} />
+            Einreichen
+          </Link>
+        ) : (
+          <Link
+            href="/marktplatz/nachrichten"
+            className={`relative flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] ${
+              nachrichtenAktiv ? "text-accent" : "text-zinc-500"
+            }`}
+          >
+            <IconInbox aktiv={nachrichtenAktiv} />
+            Nachrichten
+            {ungeleseneNachrichten > 0 && (
+              <span className="absolute right-[22%] top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+                {ungeleseneNachrichten}
+              </span>
+            )}
+          </Link>
+        )}
         <Link
           href="/marktplatz"
           className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] ${

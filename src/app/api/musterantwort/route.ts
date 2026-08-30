@@ -13,14 +13,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "questionId fehlt" }, { status: 400 });
   }
 
+  // Auch für Gäste zugänglich: questions ist ohnehin öffentlich lesbar (RLS
+  // questions_select_all), die Musterantwort wird erst nach dem Umdrehen der
+  // Karteikarte nachgeladen.
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "nicht angemeldet" }, { status: 401 });
-  }
 
   const { data: question, error } = await supabase
     .from("questions")

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Kommentar } from "@/lib/marktplatz-types";
 import { nutzerName } from "@/lib/pseudonym";
 import { MeldenButton } from "@/components/melden-button";
+import { useTurnstile } from "@/components/turnstile-widget";
 
 export function Kommentare({
   angebotId,
@@ -20,6 +21,7 @@ export function Kommentare({
   const router = useRouter();
   const [text, setText] = useState("");
   const [sendet, setSendet] = useState(false);
+  const { token, widget, reset, erforderlich } = useTurnstile();
 
   async function absenden() {
     if (text.trim() === "") return;
@@ -27,12 +29,14 @@ export function Kommentare({
     const res = await fetch("/api/marktplatz/kommentare", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ angebotId, text }),
+      body: JSON.stringify({ angebotId, text, turnstileToken: token }),
     });
     setSendet(false);
     if (res.ok) {
       setText("");
       router.refresh();
+    } else {
+      reset();
     }
   }
 
@@ -64,21 +68,24 @@ export function Kommentare({
         )}
       </div>
 
-      <div className="flex gap-2">
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Kommentar schreiben…"
-          className="kp-input flex-1"
-        />
-        <button
-          type="button"
-          disabled={sendet || text.trim() === ""}
-          onClick={absenden}
-          className="kp-btn-primary"
-        >
-          Senden
-        </button>
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-2">
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Kommentar schreiben…"
+            className="kp-input flex-1"
+          />
+          <button
+            type="button"
+            disabled={sendet || text.trim() === "" || (erforderlich && !token)}
+            onClick={absenden}
+            className="kp-btn-primary"
+          >
+            Senden
+          </button>
+        </div>
+        {text.trim() !== "" && widget}
       </div>
     </div>
   );

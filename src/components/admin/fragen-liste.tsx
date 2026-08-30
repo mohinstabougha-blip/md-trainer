@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { AdminQuestion } from "@/lib/admin-data";
+import { useZeilenAuswahl } from "@/components/admin/use-zeilen-auswahl";
 
 const FILTER_STORAGE_KEY = "admin-fragen-filter";
 
@@ -41,6 +42,9 @@ export function FragenListe({ fragen }: { fragen: AdminQuestion[] }) {
   const [bisDatum, setBisDatum] = useState("");
   const [nurUngeprueft, setNurUngeprueft] = useState(false);
   const [loeschtId, setLoeschtId] = useState<number | null>(null);
+  const [bulkModul, setBulkModul] = useState("");
+  const [bulkLaeuft, setBulkLaeuft] = useState(false);
+  const [bulkFehler, setBulkFehler] = useState<string | null>(null);
   const [gepruefteIds, setGepruefteIds] = useState<Map<number, boolean>>(new Map());
   const [toggeltId, setToggeltId] = useState<number | null>(null);
   const [breiten, setBreiten] = useState<Record<SpaltenKey, number>>(STANDARD_BREITEN);
@@ -169,6 +173,62 @@ export function FragenListe({ fragen }: { fragen: AdminQuestion[] }) {
     return true;
   });
 
+  const filterAktiv = Boolean(
+    suche ||
+      modulFilter ||
+      teilFilter ||
+      quelleFilter ||
+      pruefungszentrumFilter ||
+      vonDatum ||
+      bisDatum ||
+      nurUngeprueft
+  );
+
+  function filterZuruecksetzen() {
+    setSuche("");
+    setModulFilter("");
+    setTeilFilter("");
+    setQuelleFilter("");
+    setPruefungszentrumFilter("");
+    setVonDatum("");
+    setBisDatum("");
+    setNurUngeprueft(false);
+    try {
+      sessionStorage.removeItem(FILTER_STORAGE_KEY);
+    } catch {
+      // ignorieren
+    }
+  }
+
+  const gefilterteIds = gefiltert.map((f) => f.id);
+  const { ausgewaehlt, setAusgewaehlt, zeileMausRunter, zeileMausRein, alleUmschalten } =
+    useZeilenAuswahl(gefilterteIds);
+  const alleGefiltertAusgewaehlt =
+    gefilterteIds.length > 0 && gefilterteIds.every((id) => ausgewaehlt.has(id));
+
+  async function bulkModulAnwenden() {
+    const ids = [...ausgewaehlt];
+    const modul = bulkModul.trim();
+    if (ids.length === 0 || !modul) return;
+    if (!confirm(`Modul von ${ids.length} Frage(n) auf „${modul}" ändern?`)) return;
+    setBulkLaeuft(true);
+    setBulkFehler(null);
+    const res = await fetch("/api/admin/questions/bulk", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids, modul }),
+    });
+    setBulkLaeuft(false);
+    if (res.ok) {
+      setAusgewaehlt(new Set());
+      setBulkModul("");
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => null);
+      setBulkFehler(data?.error ?? "Aktualisierung fehlgeschlagen");
+    }
+  }
+
   async function loeschen(id: number) {
     if (!confirm("Diese Frage wirklich löschen?")) return;
     setLoeschtId(id);
@@ -199,7 +259,8 @@ export function FragenListe({ fragen }: { fragen: AdminQuestion[] }) {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">
-          Fragen ({fragen.length}, {gefiltert.length} angezeigt)
+          Fragen ({fragen.length}, {gefiltert.length} angezeigt
+          {ausgewaehlt.size > 0 && `, ${ausgewaehlt.size} ausgewählt`})
         </h1>
         <Link href="/admin/fragen/neu" className="kp-btn-primary py-1.5">
           Neue Frage
@@ -282,11 +343,60 @@ export function FragenListe({ fragen }: { fragen: AdminQuestion[] }) {
           />
           nur ungeprüfte anzeigen
         </label>
+        {filterAktiv && (
+          <button
+            type="button"
+            onClick={filterZuruecksetzen}
+            className="text-sm text-accent hover:underline"
+          >
+            Filter zurücksetzen
+          </button>
+        )}
+        {vonDatum && bisDatum && vonDatum > bisDatum && (
+          <span className="text-sm text-red-600">von-Datum liegt nach bis-Datum</span>
+        )}
       </div>
+
+      {ausgewaehlt.size > 0 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl bg-accent/10 px-3 py-2 text-sm">
+          <span className="font-medium">{ausgewaehlt.size} ausgewählt</span>
+          <span className="text-xs text-zinc-500">(Tipp: über die Kästchen ziehen wählt mehrere auf einmal)</span>
+          <span className="text-zinc-500">→ Modul ändern auf</span>
+          <input
+            list="admin-bulk-module"
+            value={bulkModul}
+            onChange={(e) => setBulkModul(e.target.value)}
+            placeholder="Modulname"
+            className="kp-input py-1"
+          />
+          <datalist id="admin-bulk-module">
+            {alleModule.map((m) => (
+              <option key={m} value={m} />
+            ))}
+          </datalist>
+          <button
+            type="button"
+            disabled={!bulkModul.trim() || bulkLaeuft}
+            onClick={bulkModulAnwenden}
+            className="kp-btn-primary py-1.5"
+          >
+            {bulkLaeuft ? "Speichert…" : "Anwenden"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setAusgewaehlt(new Set())}
+            className="text-zinc-600 hover:underline"
+          >
+            Auswahl aufheben
+          </button>
+          {bulkFehler && <span className="text-red-600">{bulkFehler}</span>}
+        </div>
+      )}
 
       <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
         <table className="text-left text-sm" style={{ tableLayout: "fixed" }}>
           <colgroup>
+            <col style={{ width: 40 }} />
             <col style={{ width: breiten.modul }} />
             <col style={{ width: breiten.kurs }} />
             <col style={{ width: breiten.teil }} />
@@ -297,6 +407,14 @@ export function FragenListe({ fragen }: { fragen: AdminQuestion[] }) {
           </colgroup>
           <thead className="bg-zinc-50">
             <tr>
+              <th className="px-3 py-2">
+                <input
+                  type="checkbox"
+                  checked={alleGefiltertAusgewaehlt}
+                  onChange={alleUmschalten}
+                  aria-label="Alle angezeigten Fragen auswählen"
+                />
+              </th>
               <th className="relative px-3 py-2">
                 Modul
                 <SpaltenGriff onMouseDown={(e) => ziehenStart("modul", e)} />
@@ -325,8 +443,28 @@ export function FragenListe({ fragen }: { fragen: AdminQuestion[] }) {
             </tr>
           </thead>
           <tbody>
-            {gefiltert.map((f) => (
-              <tr key={f.id} className="border-t border-zinc-100">
+            {gefiltert.map((f, index) => (
+              <tr
+                key={f.id}
+                className={`border-t border-zinc-100 ${ausgewaehlt.has(f.id) ? "bg-accent/5" : ""}`}
+              >
+                <td
+                  className="cursor-pointer select-none px-3 py-2"
+                  onMouseDown={(ev) => {
+                    ev.preventDefault();
+                    zeileMausRunter(index, ev.shiftKey);
+                  }}
+                  onMouseEnter={() => zeileMausRein(index)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={ausgewaehlt.has(f.id)}
+                    readOnly
+                    tabIndex={-1}
+                    aria-label={`Frage ${f.id} auswählen`}
+                    className="pointer-events-none"
+                  />
+                </td>
                 <td className="truncate px-3 py-2">{f.modul}</td>
                 <td className="truncate px-3 py-2">{f.kurs}</td>
                 <td className="px-3 py-2">{f.teil}</td>

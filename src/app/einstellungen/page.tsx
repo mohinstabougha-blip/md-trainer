@@ -31,6 +31,9 @@ export default async function EinstellungenPage() {
             <Link href="/einreichen" className="text-sm text-accent hover:underline">
               Frage einreichen
             </Link>
+            <Link href="/about" className="text-sm text-accent hover:underline">
+              Über KP Baden
+            </Link>
           </div>
           <AbmeldenButton className="w-fit text-sm text-red-600 hover:underline sm:hidden" />
         </div>

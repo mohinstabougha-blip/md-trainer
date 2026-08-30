@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTurnstile } from "@/components/turnstile-widget";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [fehler, setFehler] = useState<string | null>(null);
   const [sendet, setSendet] = useState(false);
+  const { token, widget, reset, erforderlich } = useTurnstile();
 
   async function anmelden(e: React.FormEvent) {
     e.preventDefault();
@@ -16,13 +18,14 @@ export default function AdminLoginPage() {
     const res = await fetch("/api/admin/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ password, turnstileToken: token }),
     });
     setSendet(false);
     if (res.ok) {
       router.push("/admin/fragen");
       router.refresh();
     } else {
+      reset();
       const data = await res.json().catch(() => null);
       setFehler(data?.error ?? "Anmeldung fehlgeschlagen");
     }
@@ -40,8 +43,13 @@ export default function AdminLoginPage() {
           autoFocus
           className="kp-input"
         />
+        {widget}
         {fehler && <p className="text-sm text-red-600">{fehler}</p>}
-        <button type="submit" disabled={sendet || password === ""} className="kp-btn-primary">
+        <button
+          type="submit"
+          disabled={sendet || password === "" || (erforderlich && !token)}
+          className="kp-btn-primary"
+        >
           Anmelden
         </button>
       </form>

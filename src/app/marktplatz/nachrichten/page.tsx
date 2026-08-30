@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getKonversationen } from "@/lib/marktplatz";
 import { getAnzeigenamen } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
@@ -11,7 +12,8 @@ export default async function NachrichtenPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const konversationen = await getKonversationen(user!.id);
+  if (!user) redirect("/login");
+  const konversationen = await getKonversationen(user.id);
   const namen = await getAnzeigenamen(konversationen.map((k) => k.partnerId));
 
   return (

@@ -1,0 +1,8 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" rx="15" fill="#3797f0"/>
+  <!-- Karteikarte mit umgeknickter Ecke -->
+  <path d="M17 14h20l10 10v26a2 2 0 0 1-2 2H17a2 2 0 0 1-2-2V16a2 2 0 0 1 2-2z" fill="#ffffff"/>
+  <path d="M37 14l10 10H39a2 2 0 0 1-2-2z" fill="#c9e0fb"/>
+  <!-- Häkchen (Active Recall / richtig beantwortet) -->
+  <path d="M22 37l6 6 12-14" fill="none" stroke="#3797f0" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { WartezeitGraph } from "@/components/wartezeit-graph";
+import { useTurnstile } from "@/components/turnstile-widget";
+import type { WartezeitVerlauf } from "@/lib/wartezeit";
 
 type Meldung = {
   antrag_datum: string;
@@ -12,13 +15,16 @@ type Meldung = {
 
 export function WartezeitBadge({
   badgeText,
-  detailText,
+  verlauf,
   initial,
+  istGast = false,
 }: {
   badgeText: string;
-  detailText: string;
+  verlauf: WartezeitVerlauf;
   initial: Meldung;
+  istGast?: boolean;
 }) {
+  const { token, widget, reset, erforderlich } = useTurnstile();
   const [detailOffen, setDetailOffen] = useState(false);
   const [formularOffen, setFormularOffen] = useState(false);
   const [antragDatum, setAntragDatum] = useState(initial?.antrag_datum ?? "");
@@ -41,6 +47,7 @@ export function WartezeitBadge({
         rechnungDatum: rechnungErhalten ? rechnungDatum : null,
         terminErhalten,
         pruefungsdatum: terminErhalten ? pruefungsdatum : null,
+        turnstileToken: token,
       }),
     });
     setSpeichert(false);
@@ -50,6 +57,7 @@ export function WartezeitBadge({
       // holt die frische RSC-Payload im Dev-Modus nicht immer zuverlässig ab.
       window.location.reload();
     } else {
+      reset();
       const data = await res.json().catch(() => null);
       setFehler(data?.error ?? "Speichern fehlgeschlagen");
     }
@@ -84,13 +92,15 @@ export function WartezeitBadge({
                 Schließen
               </button>
             </div>
-            <p className="mt-2 text-sm text-zinc-600">{detailText}</p>
+            <WartezeitGraph verlauf={verlauf} antragDatum={initial?.antrag_datum ?? null} />
             <button
               type="button"
               onClick={() => setFormularOffen(true)}
               className="mt-3 text-sm text-accent hover:underline"
             >
-              Meine Daten eintragen/aktualisieren
+              {istGast
+                ? "Meine Wartezeit anonym melden"
+                : "Meine Daten eintragen/aktualisieren"}
             </button>
           </div>
         </div>
@@ -100,6 +110,12 @@ export function WartezeitBadge({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-white p-5 text-left shadow-lg">
             <h2 className="text-sm font-semibold">Meine Wartezeit-Daten</h2>
+            {istGast && (
+              <p className="mt-1 text-xs text-zinc-500">
+                Wird anonym gemeldet und fließt in den Community-Schnitt ein. Als Gast
+                kannst du deine Meldung später nicht mehr ändern.
+              </p>
+            )}
 
             <div className="mt-3 flex flex-col gap-3">
               <label className="flex flex-col gap-1 text-sm">
@@ -157,6 +173,8 @@ export function WartezeitBadge({
 
             {fehler && <p className="mt-2 text-sm text-red-600">{fehler}</p>}
 
+            <div className="mt-3">{widget}</div>
+
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
@@ -167,11 +185,11 @@ export function WartezeitBadge({
               </button>
               <button
                 type="button"
-                disabled={!gueltig || speichert}
+                disabled={!gueltig || speichert || (erforderlich && !token)}
                 onClick={speichern}
                 className="kp-btn-primary py-1.5"
               >
-                Speichern
+                {istGast ? "Anonym melden" : "Speichern"}
               </button>
             </div>
           </div>

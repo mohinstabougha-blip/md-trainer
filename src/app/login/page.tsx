@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { TurnstileWidget } from "@/components/turnstile-widget";
+import { LogoMark } from "@/components/logo";
 
 type Modus = "anmelden" | "registrieren";
 
@@ -68,8 +69,9 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 bg-zinc-50 p-6">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold tracking-tight text-accent">KP-Trainer</h1>
+      <div className="flex flex-col items-center text-center">
+        <LogoMark size={44} />
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-accent">KP Baden</h1>
         <p className="mt-1 text-sm text-zinc-500">
           {modus === "anmelden" ? "Melde dich an" : "Erstelle ein Konto"}
         </p>
@@ -133,6 +135,18 @@ export default function LoginPage() {
           {modus === "anmelden" ? "Anmelden" : "Konto erstellen"}
         </button>
       </form>
+
+      <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-center text-sm text-zinc-500">
+        <a href="/about" className="hover:text-zinc-900">
+          Was ist KP Baden?
+        </a>
+        <a href="/datenschutz" className="hover:text-zinc-900">
+          Datenschutz
+        </a>
+        <a href="/impressum" className="hover:text-zinc-900">
+          Impressum
+        </a>
+      </div>
     </div>
   );
 }

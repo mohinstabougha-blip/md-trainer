@@ -12,9 +12,38 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
-  title: "KP-Trainer",
-  description: "Active-Recall-Trainer für die Kenntnisprüfung",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "KP Baden – Übungsfragen für die Kenntnisprüfung",
+    template: "%s · KP Baden",
+  },
+  description:
+    "Kostenloser Active-Recall-Trainer für die ärztliche Kenntnisprüfung: Prüfungsfragen aus echten Protokollen, Karteikarten, Fortschritt, Marktplatz für Simulationspartner.",
+  applicationName: "KP Baden",
+  keywords: [
+    "Kenntnisprüfung",
+    "KP",
+    "Gleichwertigkeitsverfahren",
+    "Approbation",
+    "Prüfungsfragen",
+    "Active Recall",
+    "Karteikarten",
+    "Fachsprachprüfung",
+  ],
+  openGraph: {
+    type: "website",
+    siteName: "KP Baden",
+    title: "KP Baden – Übungsfragen für die Kenntnisprüfung",
+    description:
+      "Kostenloser Active-Recall-Trainer für die ärztliche Kenntnisprüfung. Von einem approbierten Arzt für die Community.",
+    url: siteUrl,
+    locale: "de_DE",
+  },
+  twitter: { card: "summary" },
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
