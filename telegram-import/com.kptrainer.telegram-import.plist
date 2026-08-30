@@ -6,8 +6,8 @@
     <string>com.kptrainer.telegram-import</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/mohammed-salahboughalem/Documents/md-trainer/telegram-import/.venv/bin/python3</string>
-        <string>/Users/mohammed-salahboughalem/Documents/md-trainer/telegram-import/import_telegram.py</string>
+        <string>/bin/bash</string>
+        <string>/Users/mohammed-salahboughalem/Documents/md-trainer/telegram-import/run_taeglich.sh</string>
     </array>
     <key>StartCalendarInterval</key>
     <dict>
