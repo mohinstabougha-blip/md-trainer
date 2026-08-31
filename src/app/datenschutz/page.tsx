@@ -10,22 +10,24 @@ export default function DatenschutzPage() {
   return (
     <RechtsSeite titel="Datenschutzerklärung">
       <p className="rounded-xl bg-amber-50 p-3 text-amber-900">
-        Hinweis: Die mit [eckigen Klammern] markierten Angaben (Verantwortlicher, Kontakt,
-        Hosting-Anbieter, Server-Standort/Region) müssen vor der Veröffentlichung durch die
-        tatsächlichen Daten ersetzt werden. Diese Vorlage beschreibt die derzeit im Code
-        angelegten Verarbeitungen; bei Änderungen der eingesetzten Dienste ist sie
-        anzupassen.
+        Hinweis: Die noch mit [eckigen Klammern] markierten Angaben (E-Mail für
+        Datenschutzanfragen, Server-Standort/Region von Supabase) müssen vor der
+        Veröffentlichung durch die tatsächlichen Daten ersetzt werden. Diese Erklärung
+        beschreibt die derzeit im Code angelegten Verarbeitungen; bei Änderungen der
+        eingesetzten Dienste ist sie anzupassen.
       </p>
 
       <h2>1. Verantwortlicher</h2>
       <p>
         Verantwortlich für die Datenverarbeitung auf dieser Website ist:
         <br />
-        [Vorname Nachname]
+        EL INCUBATEUR
         <br />
-        [Straße und Hausnummer], [PLZ Ort], [Land]
+        170 Rue Hassiba Ben Bouali, Belouizdad, 16015 Algier, Algerien
         <br />
-        E-Mail: [datenschutz@deine-domain.de]
+        Telefon: +213 21 78 50 14
+        <br />
+        E-Mail: [E-Mail-Adresse für Datenschutzanfragen eintragen]
       </p>
 
       <h2>2. Überblick</h2>
@@ -39,7 +41,8 @@ export default function DatenschutzPage() {
 
       <h2>3. Hosting</h2>
       <p>
-        Die Website wird bei [Hosting-Anbieter, z. B. Vercel Inc.] gehostet. Beim Aufruf der
+        Die Website wird bei Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA,
+        gehostet. Beim Aufruf der
         Website werden vom Hoster technisch notwendige Zugriffsdaten in Server-Logfiles
         verarbeitet (u. a. gekürzte/vollständige IP-Adresse, Datum und Uhrzeit, aufgerufene
         URL, Referrer, User-Agent). Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO
@@ -159,7 +162,7 @@ export default function DatenschutzPage() {
 
       <h2>9. Empfänger / Auftragsverarbeiter</h2>
       <ul>
-        <li>[Hosting-Anbieter] / Vercel Inc. – Auslieferung der Website und Reichweitenmessung</li>
+        <li>Vercel Inc. – Auslieferung der Website und Reichweitenmessung (Web Analytics)</li>
         <li>Supabase, Inc. – Authentifizierung und Datenbank</li>
         <li>Cloudflare, Inc. – Bot-Schutz (Turnstile)</li>
       </ul>
@@ -191,7 +194,8 @@ export default function DatenschutzPage() {
         </li>
       </ul>
       <p>
-        Zur Ausübung deiner Rechte genügt eine Nachricht an [datenschutz@deine-domain.de].
+        Zur Ausübung deiner Rechte genügt eine Nachricht an die unter Ziffer 1 genannten
+        Kontaktdaten (Postanschrift, Telefon bzw. E-Mail).
         Außerdem hast du das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren,
         insbesondere in dem Mitgliedstaat deines Aufenthaltsorts oder des mutmaßlichen
         Verstoßes.
@@ -207,7 +211,7 @@ export default function DatenschutzPage() {
       <p>
         Wir passen diese Datenschutzerklärung an, wenn sich die Rechtslage oder die
         eingesetzten Dienste ändern. Es gilt jeweils die auf dieser Seite veröffentlichte
-        Fassung. Stand: [Monat Jahr].
+        Fassung. Stand: August 2026.
       </p>
     </RechtsSeite>
   );
