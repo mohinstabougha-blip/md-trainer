@@ -73,7 +73,24 @@ export default function DatenschutzPage() {
         <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare-Datenschutzerklärung</a>.
       </p>
 
-      <h2>6. Verarbeitung im Rahmen der Funktionen</h2>
+      <h2>6. Reichweitenmessung mit Vercel Web Analytics</h2>
+      <p>
+        Zur anonymen Auswertung der Nutzung (z. B. Anzahl der Seitenaufrufe, aufgerufene
+        Seiten, ungefähre Herkunftsregion, Gerätetyp, verweisende Seite) setzen wir{" "}
+        <strong>Vercel Web Analytics</strong> (Vercel Inc.) ein. Die Erfassung erfolgt{" "}
+        <strong>cookiefrei</strong> und ohne geräteübergreifende Wiedererkennung; es werden
+        keine IP-Adressen dauerhaft gespeichert und keine für sich genommen einer Person
+        zuordenbaren Kennungen gebildet. Aus den Daten lassen sich keine einzelnen Personen
+        identifizieren. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse
+        an einer bedarfsgerechten Gestaltung des Angebots). Anbieter ist zugleich unser
+        Hosting-Dienstleister (siehe Ziffer 3). Weitere Informationen:{" "}
+        <a href="https://vercel.com/docs/analytics/privacy-policy">
+          Vercel Web Analytics – Datenschutz
+        </a>
+        .
+      </p>
+
+      <h2>7. Verarbeitung im Rahmen der Funktionen</h2>
       <ul>
         <li>
           <strong>Training / Fortschritt:</strong> deine eingegebenen Antworten/Notizen (sofern
@@ -114,7 +131,7 @@ export default function DatenschutzPage() {
         Daten.
       </p>
 
-      <h2>7. Cookies und lokale Speicherung</h2>
+      <h2>8. Cookies und lokale Speicherung</h2>
       <ul>
         <li>
           <strong>Anmelde-Sitzung (Supabase):</strong> technisch notwendige Cookies zur
@@ -135,13 +152,14 @@ export default function DatenschutzPage() {
         </li>
       </ul>
       <p>
-        Es werden keine Analyse- oder Marketing-Cookies gesetzt. Für die technisch notwendigen
-        Cookies ist keine Einwilligung erforderlich (§ 25 Abs. 2 TDDDG).
+        Es werden keine Analyse- oder Marketing-Cookies gesetzt; die Reichweitenmessung
+        (Ziffer 6) arbeitet cookiefrei. Für die technisch notwendigen Cookies ist keine
+        Einwilligung erforderlich (§ 25 Abs. 2 TDDDG).
       </p>
 
-      <h2>8. Empfänger / Auftragsverarbeiter</h2>
+      <h2>9. Empfänger / Auftragsverarbeiter</h2>
       <ul>
-        <li>[Hosting-Anbieter] – Bereitstellung/Auslieferung der Website</li>
+        <li>[Hosting-Anbieter] / Vercel Inc. – Auslieferung der Website und Reichweitenmessung</li>
         <li>Supabase, Inc. – Authentifizierung und Datenbank</li>
         <li>Cloudflare, Inc. – Bot-Schutz (Turnstile)</li>
       </ul>
@@ -150,7 +168,7 @@ export default function DatenschutzPage() {
         verpflichtet.
       </p>
 
-      <h2>9. Speicherdauer</h2>
+      <h2>10. Speicherdauer</h2>
       <p>
         Kontodaten und zugehörige Nutzungsdaten werden gespeichert, solange dein Konto besteht.
         Bei Löschung des Kontos werden die dir zugeordneten personenbezogenen Daten gelöscht
@@ -159,7 +177,7 @@ export default function DatenschutzPage() {
         anonymisiert. Gesetzliche Aufbewahrungspflichten bleiben unberührt.
       </p>
 
-      <h2>10. Deine Rechte</h2>
+      <h2>11. Deine Rechte</h2>
       <p>Du hast im Rahmen der gesetzlichen Voraussetzungen das Recht auf:</p>
       <ul>
         <li>Auskunft über die zu dir gespeicherten Daten (Art. 15 DSGVO)</li>
@@ -179,13 +197,13 @@ export default function DatenschutzPage() {
         Verstoßes.
       </p>
 
-      <h2>11. Keine automatisierte Entscheidungsfindung</h2>
+      <h2>12. Keine automatisierte Entscheidungsfindung</h2>
       <p>
         Eine ausschließlich automatisierte Entscheidungsfindung einschließlich Profiling nach
         Art. 22 DSGVO findet nicht statt.
       </p>
 
-      <h2>12. Änderungen dieser Datenschutzerklärung</h2>
+      <h2>13. Änderungen dieser Datenschutzerklärung</h2>
       <p>
         Wir passen diese Datenschutzerklärung an, wenn sich die Rechtslage oder die
         eingesetzten Dienste ändern. Es gilt jeweils die auf dieser Seite veröffentlichte
