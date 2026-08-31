@@ -10,11 +10,10 @@ export default function DatenschutzPage() {
   return (
     <RechtsSeite titel="Datenschutzerklärung">
       <p className="rounded-xl bg-amber-50 p-3 text-amber-900">
-        Hinweis: Die noch mit [eckigen Klammern] markierten Angaben (E-Mail für
-        Datenschutzanfragen, Server-Standort/Region von Supabase) müssen vor der
-        Veröffentlichung durch die tatsächlichen Daten ersetzt werden. Diese Erklärung
-        beschreibt die derzeit im Code angelegten Verarbeitungen; bei Änderungen der
-        eingesetzten Dienste ist sie anzupassen.
+        Hinweis: Die noch mit [eckigen Klammern] markierte Angabe (Server-Standort/Region
+        von Supabase) muss vor der Veröffentlichung durch den tatsächlichen Wert ersetzt
+        werden. Diese Erklärung beschreibt die derzeit im Code angelegten Verarbeitungen;
+        bei Änderungen der eingesetzten Dienste ist sie anzupassen.
       </p>
 
       <h2>1. Verantwortlicher</h2>
@@ -27,7 +26,7 @@ export default function DatenschutzPage() {
         <br />
         Telefon: +213 21 78 50 14
         <br />
-        E-Mail: [E-Mail-Adresse für Datenschutzanfragen eintragen]
+        E-Mail: datenschutz@kpbaden.com
       </p>
 
       <h2>2. Überblick</h2>
