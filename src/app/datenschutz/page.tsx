@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { RechtsSeite } from "@/components/rechts-seite";
+import { ConsentWiderruf } from "@/components/consent-widerruf";
 
 export const metadata: Metadata = {
   title: "Datenschutzerklärung",
@@ -92,7 +93,29 @@ export default function DatenschutzPage() {
         .
       </p>
 
-      <h2>7. Verarbeitung im Rahmen der Funktionen</h2>
+      <h2>7. Reichweitenmessung und Werbung mit Meta Pixel (nur mit Einwilligung)</h2>
+      <p>
+        Sofern du im Cookie-Hinweis eingewilligt hast, setzen wir den{" "}
+        <strong>Meta Pixel</strong> der Meta Platforms Ireland Ltd. (4 Grand Canal Square,
+        Grand Canal Harbour, Dublin 2, Irland) ein. Damit messen wir die Wirksamkeit unserer
+        Werbeanzeigen auf Facebook und Instagram und können Besucherinnen und Besuchern dieser
+        Website dort passende Anzeigen ausspielen (Retargeting). Beim Seitenaufruf werden u. a.
+        IP-Adresse, Browser- und Geräteangaben, aufgerufene Seiten sowie Zeitpunkt an Meta
+        übermittelt; der Pixel speichert hierfür Cookies (u. a. <code>_fbp</code>). Eine
+        Übermittlung an die Meta Platforms, Inc. in den USA ist möglich; Meta stützt sich
+        hierbei auf die EU-Standardvertragsklauseln. Für einen Teil der Verarbeitung sind wir
+        gemeinsam mit Meta verantwortlich (Art. 26 DSGVO).
+      </p>
+      <p>
+        Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1
+        TDDDG). Ohne Einwilligung wird der Meta Pixel nicht geladen. Du kannst deine
+        Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen – über die
+        Schaltfläche am Ende dieser Seite oder durch Löschen der Cookies im Browser. Weitere
+        Informationen:{" "}
+        <a href="https://www.facebook.com/privacy/policy">Meta-Datenschutzrichtlinie</a>.
+      </p>
+
+      <h2>8. Verarbeitung im Rahmen der Funktionen</h2>
       <ul>
         <li>
           <strong>Training / Fortschritt:</strong> deine eingegebenen Antworten/Notizen (sofern
@@ -133,7 +156,7 @@ export default function DatenschutzPage() {
         Daten.
       </p>
 
-      <h2>8. Cookies und lokale Speicherung</h2>
+      <h2>9. Cookies und lokale Speicherung</h2>
       <ul>
         <li>
           <strong>Anmelde-Sitzung (Supabase):</strong> technisch notwendige Cookies zur
@@ -149,28 +172,39 @@ export default function DatenschutzPage() {
         </li>
         <li>
           <strong>Lokale Einstellungen:</strong> im Browser gespeicherte Filter-/Ansichts­
-          einstellungen (Session Storage), die deine Bedienung erleichtern und den Server nicht
-          erreichen.
+          einstellungen (Session Storage) sowie deine Cookie-Auswahl. Sie erleichtern die
+          Bedienung und erreichen den Server nicht.
+        </li>
+        <li>
+          <strong>Meta Pixel (<code>_fbp</code> u. a.):</strong> Marketing-Cookies, die{" "}
+          <strong>nur nach deiner Einwilligung</strong> im Cookie-Hinweis gesetzt werden
+          (Ziffer 7).
         </li>
       </ul>
       <p>
-        Es werden keine Analyse- oder Marketing-Cookies gesetzt; die Reichweitenmessung
-        (Ziffer 6) arbeitet cookiefrei. Für die technisch notwendigen Cookies ist keine
-        Einwilligung erforderlich (§ 25 Abs. 2 TDDDG).
+        Die Reichweitenmessung nach Ziffer 6 arbeitet cookiefrei. Marketing-Cookies (Meta
+        Pixel) werden ausschließlich mit deiner Einwilligung gesetzt und lassen sich
+        jederzeit widerrufen (siehe Ziffer 7 bzw. Schaltfläche am Seitenende). Für die
+        technisch notwendigen Cookies ist keine Einwilligung erforderlich (§ 25 Abs. 2
+        TDDDG).
       </p>
 
-      <h2>9. Empfänger / Auftragsverarbeiter</h2>
+      <h2>10. Empfänger / Auftragsverarbeiter</h2>
       <ul>
         <li>Vercel Inc. – Auslieferung der Website und Reichweitenmessung (Web Analytics)</li>
         <li>Supabase, Inc. – Authentifizierung und Datenbank</li>
         <li>Cloudflare, Inc. – Bot-Schutz (Turnstile)</li>
+        <li>
+          Meta Platforms Ireland Ltd. – Reichweitenmessung und Werbung (Meta Pixel), nur
+          mit Einwilligung
+        </li>
       </ul>
       <p>
         Eine Weitergabe an weitere Dritte erfolgt nicht, außer wir sind gesetzlich dazu
         verpflichtet.
       </p>
 
-      <h2>10. Speicherdauer</h2>
+      <h2>11. Speicherdauer</h2>
       <p>
         Kontodaten und zugehörige Nutzungsdaten werden gespeichert, solange dein Konto besteht.
         Bei Löschung des Kontos werden die dir zugeordneten personenbezogenen Daten gelöscht
@@ -179,7 +213,7 @@ export default function DatenschutzPage() {
         anonymisiert. Gesetzliche Aufbewahrungspflichten bleiben unberührt.
       </p>
 
-      <h2>11. Deine Rechte</h2>
+      <h2>12. Deine Rechte</h2>
       <p>Du hast im Rahmen der gesetzlichen Voraussetzungen das Recht auf:</p>
       <ul>
         <li>Auskunft über die zu dir gespeicherten Daten (Art. 15 DSGVO)</li>
@@ -200,18 +234,22 @@ export default function DatenschutzPage() {
         Verstoßes.
       </p>
 
-      <h2>12. Keine automatisierte Entscheidungsfindung</h2>
+      <h2>13. Keine automatisierte Entscheidungsfindung</h2>
       <p>
         Eine ausschließlich automatisierte Entscheidungsfindung einschließlich Profiling nach
         Art. 22 DSGVO findet nicht statt.
       </p>
 
-      <h2>13. Änderungen dieser Datenschutzerklärung</h2>
+      <h2>14. Änderungen dieser Datenschutzerklärung</h2>
       <p>
         Wir passen diese Datenschutzerklärung an, wenn sich die Rechtslage oder die
         eingesetzten Dienste ändern. Es gilt jeweils die auf dieser Seite veröffentlichte
         Fassung. Stand: August 2026.
       </p>
+
+      <h2>15. Cookie-Einwilligung verwalten</h2>
+      <p>Hier kannst du deine Einwilligung in Marketing-Cookies (Meta Pixel) jederzeit ändern:</p>
+      <ConsentWiderruf />
     </RechtsSeite>
   );
 }
