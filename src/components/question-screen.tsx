@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { SessionQuestion } from "@/lib/questions";
 import type { Bewertung } from "@/lib/bewertung-types";
 import { FeedbackForm } from "@/components/feedback-form";
@@ -54,6 +54,8 @@ export function QuestionScreen({
   );
   const [ausgewaehlteBewertung, setAusgewaehlteBewertung] = useState<Bewertung | null>(null);
   const [speichertBewertung, setSpeichertBewertung] = useState(false);
+  const [mussWaehlen, setMussWaehlen] = useState(false);
+  const bewertungRef = useRef<HTMLDivElement>(null);
 
   const aufgedeckt = status === "musterantwort";
 
@@ -84,7 +86,11 @@ export function QuestionScreen({
   }
 
   async function weiterKlick() {
-    if (!ausgewaehlteBewertung) return;
+    if (!ausgewaehlteBewertung) {
+      setMussWaehlen(true);
+      bewertungRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     setSpeichertBewertung(true);
 
     // Gast: Selbsteinschätzung nur lokal im Browser merken, nichts an den Server.
@@ -119,35 +125,56 @@ export function QuestionScreen({
   }
 
   return (
-    <div className="relative mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-6 p-6 pb-10">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-3">
+    <div className="relative mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-6 p-6 pb-4">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-2">
           <FrageMenu
             istAdmin={istAdmin}
             istGast={istGast}
             ungeleseneNachrichten={ungeleseneNachrichten}
           />
-          <span className="text-sm text-zinc-500">
-            Frage {index + 1} von {gesamt} · {question.modul} / {question.kurs} · Teil{" "}
-            {question.teil}
-          </span>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              aria-label="Problem melden"
+              onClick={() => setFeedbackOffen(true)}
+              className="text-lg"
+            >
+              ⚠️
+            </button>
+            <button
+              type="button"
+              onClick={abbrechenKlick}
+              className="text-sm font-medium text-red-600 hover:underline"
+            >
+              Abbrechen
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            aria-label="Problem melden"
-            onClick={() => setFeedbackOffen(true)}
-            className="text-lg"
-          >
-            ⚠️
-          </button>
-          <button
-            type="button"
-            onClick={abbrechenKlick}
-            className="text-sm font-medium text-red-600 hover:underline"
-          >
-            Abbrechen
-          </button>
+
+        <div>
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="text-xl font-bold tracking-tight text-zinc-800">
+              Frage <span className="text-accent">{index + 1}</span>
+              <span className="font-medium text-zinc-400"> / {gesamt}</span>
+            </h2>
+            <span
+              className="truncate text-xs text-zinc-500"
+              title={`${question.modul} · ${question.kurs} · Teil ${question.teil}`}
+            >
+              {question.modul} · {question.kurs} · Teil {question.teil}
+            </span>
+          </div>
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
+            <div
+              role="progressbar"
+              aria-valuemin={1}
+              aria-valuemax={gesamt}
+              aria-valuenow={index + 1}
+              className="h-full rounded-full bg-accent transition-[width] duration-500"
+              style={{ width: `${(Math.min(index + 1, gesamt) / Math.max(gesamt, 1)) * 100}%` }}
+            />
+          </div>
         </div>
       </div>
 
@@ -283,17 +310,30 @@ export function QuestionScreen({
 
       {aufgedeckt && musterantwortErgebnis && (
         <div className="flex flex-col gap-4">
-          <div className="kp-card flex flex-col gap-3">
+          <div
+            ref={bewertungRef}
+            className={`kp-card flex flex-col gap-3 transition-shadow ${
+              mussWaehlen && !ausgewaehlteBewertung ? "ring-2 ring-amber-400" : ""
+            }`}
+          >
             <h3 className="text-sm font-medium text-zinc-500">
               Wie hast du im Vergleich zur Musterantwort abgeschnitten?
             </h3>
+            {mussWaehlen && !ausgewaehlteBewertung && (
+              <p className="text-sm font-medium text-amber-700">
+                Bitte wähle eine Einschätzung, um zur nächsten Frage zu gehen.
+              </p>
+            )}
             <div className="grid grid-cols-3 gap-2">
               {BEWERTUNG_OPTIONEN.map((opt) => (
                 <button
                   key={opt.wert}
                   type="button"
                   disabled={speichertBewertung}
-                  onClick={() => setAusgewaehlteBewertung(opt.wert)}
+                  onClick={() => {
+                    setAusgewaehlteBewertung(opt.wert);
+                    setMussWaehlen(false);
+                  }}
                   className={`rounded-full px-3 py-2 text-sm font-semibold transition-colors disabled:opacity-40 ${
                     ausgewaehlteBewertung === opt.wert
                       ? `${opt.className} ring-2 ring-offset-1 ring-current`
@@ -308,14 +348,16 @@ export function QuestionScreen({
 
           <AntwortKommentare questionId={question.id} istGast={istGast} />
 
-          <button
-            type="button"
-            disabled={!ausgewaehlteBewertung || speichertBewertung}
-            onClick={weiterKlick}
-            className="kp-btn-primary py-3.5"
-          >
-            Nächste Frage
-          </button>
+          <div className="sticky bottom-0 -mx-6 mt-1 border-t border-zinc-100 bg-zinc-50/95 px-6 pb-3 pt-3 backdrop-blur">
+            <button
+              type="button"
+              disabled={speichertBewertung}
+              onClick={weiterKlick}
+              className="kp-btn-primary w-full py-3.5"
+            >
+              {speichertBewertung ? "…" : "Nächste Frage"}
+            </button>
+          </div>
         </div>
       )}
 
