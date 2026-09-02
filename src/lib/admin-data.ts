@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Einreichung } from "@/lib/einreichungen-types";
+import type { FrageKurz } from "@/lib/duplikat-check";
 
 export type QuestionQuelleTyp = "nutzer" | "telegram";
 
@@ -171,6 +172,14 @@ export async function getOffeneEinreichungen(): Promise<Einreichung[]> {
     .select("*")
     .eq("status", "offen")
     .order("erstellt_am", { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+/** Kurzliste aller bestehenden Fragen für die Duplikat-Erkennung. */
+export async function getFragenFuerDuplikatCheck(): Promise<FrageKurz[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase.from("questions").select("id, modul, kurs, frage");
   if (error) throw error;
   return data;
 }

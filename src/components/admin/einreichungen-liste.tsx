@@ -4,10 +4,30 @@ import { Fragment, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Einreichung } from "@/lib/einreichungen-types";
 import { QUELLE_LABEL } from "@/lib/einreichungen-types";
+import type { DuplikatTreffer } from "@/lib/duplikat-check";
 import { useZeilenAuswahl } from "@/components/admin/use-zeilen-auswahl";
 import { BildFeld } from "@/components/admin/bild-feld";
 
-function EinreichungKarte({ e, namen }: { e: Einreichung; namen: Record<string, string> }) {
+function DuplikatBadge({ score }: { score: number }) {
+  return (
+    <span
+      title={`Textähnlichkeit ${Math.round(score * 100)} % zu einer bestehenden Frage`}
+      className="whitespace-nowrap rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
+    >
+      ⚠ mögl. Duplikat {Math.round(score * 100)} %
+    </span>
+  );
+}
+
+function EinreichungKarte({
+  e,
+  namen,
+  treffer,
+}: {
+  e: Einreichung;
+  namen: Record<string, string>;
+  treffer?: DuplikatTreffer;
+}) {
   const router = useRouter();
   const [modul, setModul] = useState(e.modul ?? "");
   const [kurs, setKurs] = useState(e.kurs ?? "");
@@ -89,6 +109,16 @@ function EinreichungKarte({ e, namen }: { e: Einreichung; namen: Record<string, 
           · {new Date(e.erstellt_am).toLocaleString("de-DE")}
         </span>
       </div>
+
+      {treffer && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          <p className="text-xs font-medium">
+            ⚠ Mögliches Duplikat ({Math.round(treffer.score * 100)} % Textähnlichkeit) zu bestehender
+            Frage #{treffer.questionId} · {treffer.modul} / {treffer.kurs}:
+          </p>
+          <p className="mt-1">{treffer.frage}</p>
+        </div>
+      )}
 
       {e.protokoll_text && (
         <div className="rounded-xl bg-white p-3 text-sm">
@@ -180,13 +210,17 @@ export function EinreichungenListe({
   einreichungen,
   namen,
   alleModule,
+  duplikate = {},
 }: {
   einreichungen: Einreichung[];
   namen: Record<string, string>;
   alleModule: string[];
+  duplikate?: Record<number, DuplikatTreffer>;
 }) {
   const router = useRouter();
   const [offeneId, setOffeneId] = useState<number | null>(null);
+  const [nurDuplikate, setNurDuplikate] = useState(false);
+  const duplikatAnzahl = Object.keys(duplikate).length;
   const [bulkModul, setBulkModul] = useState("");
   const [bulkKommentar, setBulkKommentar] = useState("");
   const [bulkLaeuft, setBulkLaeuft] = useState<BulkAktion | null>(null);
@@ -211,6 +245,7 @@ export function EinreichungenListe({
   ].sort((a, b) => a.localeCompare(b, "de"));
 
   const gefiltert = einreichungen.filter((e) => {
+    if (nurDuplikate && !duplikate[e.id]) return false;
     if (modulFilter && e.modul !== modulFilter) return false;
     if (kursFilter && e.kurs !== kursFilter) return false;
     if (teilFilter && String(e.teil) !== teilFilter) return false;
@@ -340,7 +375,21 @@ export function EinreichungenListe({
           <option value="nutzer">Nutzer</option>
           <option value="telegram">Telegram</option>
         </select>
-        {(suche || modulFilter || kursFilter || teilFilter || quelleFilter) && (
+        <label
+          className={`flex items-center gap-1.5 whitespace-nowrap text-sm ${
+            duplikatAnzahl > 0 ? "text-amber-800" : "text-zinc-400"
+          }`}
+        >
+          <input
+            type="checkbox"
+            checked={nurDuplikate}
+            onChange={(e) => setNurDuplikate(e.target.checked)}
+            disabled={duplikatAnzahl === 0}
+            className="accent-[#3797f0]"
+          />
+          Nur mögl. Duplikate ({duplikatAnzahl})
+        </label>
+        {(suche || modulFilter || kursFilter || teilFilter || quelleFilter || nurDuplikate) && (
           <button
             type="button"
             onClick={() => {
@@ -349,6 +398,7 @@ export function EinreichungenListe({
               setKursFilter("");
               setTeilFilter("");
               setQuelleFilter("");
+              setNurDuplikate(false);
             }}
             className="text-sm text-accent hover:underline"
           >
@@ -485,11 +535,18 @@ export function EinreichungenListe({
                     <td className="max-w-[150px] truncate px-3 py-2 align-top">{e.modul ?? "—"}</td>
                     <td className="max-w-[200px] truncate px-3 py-2 align-top">{e.kurs ?? "—"}</td>
                     <td className="px-3 py-2 align-top">{e.teil ?? "—"}</td>
-                    <td className="max-w-[360px] truncate px-3 py-2 align-top">
-                      {e.typ === "protokoll" && !e.frage ? (
-                        <span className="text-zinc-400">(Protokoll)</span>
-                      ) : (
-                        e.frage
+                    <td className="max-w-[360px] px-3 py-2 align-top">
+                      <div className="truncate">
+                        {e.typ === "protokoll" && !e.frage ? (
+                          <span className="text-zinc-400">(Protokoll)</span>
+                        ) : (
+                          e.frage
+                        )}
+                      </div>
+                      {duplikate[e.id] && (
+                        <div className="mt-1">
+                          <DuplikatBadge score={duplikate[e.id].score} />
+                        </div>
                       )}
                     </td>
                     <td className="whitespace-nowrap px-3 py-2 align-top">
@@ -516,7 +573,7 @@ export function EinreichungenListe({
                   {offen && (
                     <tr className="border-t border-zinc-100 bg-zinc-50">
                       <td colSpan={7} className="px-3 py-3">
-                        <EinreichungKarte e={e} namen={namen} />
+                        <EinreichungKarte e={e} namen={namen} treffer={duplikate[e.id]} />
                       </td>
                     </tr>
                   )}
