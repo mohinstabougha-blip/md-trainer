@@ -70,13 +70,22 @@ export function NutzerTabelle({ nutzer }: { nutzer: NutzerZeile[] }) {
       <div className="mb-2 text-sm font-medium text-zinc-700">
         Registrierte Nutzer ({nutzer.length})
       </div>
-      <table className="w-full text-sm">
+      <table className="w-full text-sm" style={{ tableLayout: "fixed" }}>
+        <colgroup>
+          <col style={{ width: 130 }} />
+          <col />
+          <col style={{ width: 96 }} />
+          <col style={{ width: 60 }} />
+          <col style={{ width: 76 }} />
+          <col style={{ width: 92 }} />
+          <col style={{ width: 220 }} />
+        </colgroup>
         <thead>
           <tr className="text-xs uppercase tracking-wide text-zinc-400">
             {SPALTEN.map((sp) => (
               <th
                 key={sp.key}
-                className={`cursor-pointer select-none whitespace-nowrap py-2 pr-4 font-medium hover:text-zinc-700 ${
+                className={`cursor-pointer select-none truncate py-1.5 pr-3 font-medium hover:text-zinc-700 ${
                   sp.numerisch ? "text-right" : "text-left"
                 }`}
                 onClick={() => klick(sp.key, sp.numerisch)}
@@ -97,17 +106,19 @@ export function NutzerTabelle({ nutzer }: { nutzer: NutzerZeile[] }) {
           )}
           {sortiert.map((n) => (
             <tr key={n.userId} className="border-t border-zinc-100 align-top">
-              <td className="py-2 pr-4">{n.anzeigename ?? <span className="text-zinc-300">–</span>}</td>
-              <td className="py-2 pr-4 text-zinc-600">
+              <td className="truncate py-1.5 pr-3" title={n.anzeigename ?? undefined}>
+                {n.anzeigename ?? <span className="text-zinc-300">–</span>}
+              </td>
+              <td className="truncate py-1.5 pr-3 text-zinc-600" title={n.email ?? undefined}>
                 {n.email ?? <span className="text-zinc-300">–</span>}
               </td>
-              <td className="whitespace-nowrap py-2 pr-4 text-right tabular-nums">
+              <td className="whitespace-nowrap py-1.5 pr-3 text-right tabular-nums">
                 {new Date(n.registriertAm).toLocaleDateString("de-DE")}
               </td>
-              <td className="py-2 pr-4 text-right tabular-nums">{n.beantworteteFragen}</td>
-              <td className="py-2 pr-4 text-right tabular-nums">{n.sessions}</td>
-              <td className="py-2 pr-4 text-right tabular-nums">{n.sessionsAbgeschlossen}</td>
-              <td className="py-2 pr-4">
+              <td className="py-1.5 pr-3 text-right tabular-nums">{n.beantworteteFragen}</td>
+              <td className="py-1.5 pr-3 text-right tabular-nums">{n.sessions}</td>
+              <td className="py-1.5 pr-3 text-right tabular-nums">{n.sessionsAbgeschlossen}</td>
+              <td className="py-1.5 pr-3" title={n.module.join(", ") || undefined}>
                 {n.module.length === 0 ? (
                   <span className="text-zinc-300">–</span>
                 ) : (
@@ -115,7 +126,7 @@ export function NutzerTabelle({ nutzer }: { nutzer: NutzerZeile[] }) {
                     {n.module.map((m) => (
                       <span
                         key={m}
-                        className="whitespace-nowrap rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600"
+                        className="max-w-full truncate rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600"
                       >
                         {m}
                       </span>

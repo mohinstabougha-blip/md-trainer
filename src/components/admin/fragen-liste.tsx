@@ -9,15 +9,15 @@ import { useZeilenAuswahl } from "@/components/admin/use-zeilen-auswahl";
 const FILTER_STORAGE_KEY = "admin-fragen-filter";
 
 const STANDARD_BREITEN = {
-  modul: 160,
-  kurs: 200,
-  teil: 70,
-  frage: 340,
-  quelle: 150,
-  geprueft: 110,
+  modul: 120,
+  kurs: 140,
+  teil: 44,
+  frage: 0, // 0 = nimmt den restlichen Platz (flexibel)
+  quelle: 96,
+  geprueft: 84,
 } as const;
 
-const AKTIONEN_BREITE = 150;
+const AKTIONEN_BREITE = 118;
 
 type SpaltenKey = keyof typeof STANDARD_BREITEN;
 
@@ -394,20 +394,20 @@ export function FragenListe({ fragen }: { fragen: AdminQuestion[] }) {
       )}
 
       <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
-        <table className="text-left text-sm" style={{ tableLayout: "fixed" }}>
+        <table className="w-full text-left text-sm" style={{ tableLayout: "fixed" }}>
           <colgroup>
-            <col style={{ width: 40 }} />
+            <col style={{ width: 36 }} />
             <col style={{ width: breiten.modul }} />
             <col style={{ width: breiten.kurs }} />
             <col style={{ width: breiten.teil }} />
-            <col style={{ width: breiten.frage }} />
+            <col style={breiten.frage ? { width: breiten.frage } : undefined} />
             <col style={{ width: breiten.quelle }} />
             <col style={{ width: breiten.geprueft }} />
             <col style={{ width: AKTIONEN_BREITE }} />
           </colgroup>
           <thead className="bg-zinc-50">
             <tr>
-              <th className="px-3 py-2">
+              <th className="px-2 py-1.5">
                 <input
                   type="checkbox"
                   checked={alleGefiltertAusgewaehlt}
@@ -415,31 +415,31 @@ export function FragenListe({ fragen }: { fragen: AdminQuestion[] }) {
                   aria-label="Alle angezeigten Fragen auswählen"
                 />
               </th>
-              <th className="relative px-3 py-2">
+              <th className="relative px-2 py-1.5">
                 Modul
                 <SpaltenGriff onMouseDown={(e) => ziehenStart("modul", e)} />
               </th>
-              <th className="relative px-3 py-2">
+              <th className="relative px-2 py-1.5">
                 Kurs
                 <SpaltenGriff onMouseDown={(e) => ziehenStart("kurs", e)} />
               </th>
-              <th className="relative px-3 py-2">
+              <th className="relative px-2 py-1.5">
                 Teil
                 <SpaltenGriff onMouseDown={(e) => ziehenStart("teil", e)} />
               </th>
-              <th className="relative px-3 py-2">
+              <th className="relative px-2 py-1.5">
                 Frage
                 <SpaltenGriff onMouseDown={(e) => ziehenStart("frage", e)} />
               </th>
-              <th className="relative px-3 py-2">
+              <th className="relative px-2 py-1.5">
                 Quelle
                 <SpaltenGriff onMouseDown={(e) => ziehenStart("quelle", e)} />
               </th>
-              <th className="relative px-3 py-2">
+              <th className="relative px-2 py-1.5">
                 Geprüft
                 <SpaltenGriff onMouseDown={(e) => ziehenStart("geprueft", e)} />
               </th>
-              <th className="sticky right-0 border-l border-zinc-200 bg-zinc-50 px-3 py-2"></th>
+              <th className="sticky right-0 border-l border-zinc-200 bg-zinc-50 px-2 py-1.5"></th>
             </tr>
           </thead>
           <tbody>
@@ -449,7 +449,7 @@ export function FragenListe({ fragen }: { fragen: AdminQuestion[] }) {
                 className={`border-t border-zinc-100 ${ausgewaehlt.has(f.id) ? "bg-accent/5" : ""}`}
               >
                 <td
-                  className="cursor-pointer select-none px-3 py-2"
+                  className="cursor-pointer select-none px-2 py-1.5"
                   onMouseDown={(ev) => {
                     ev.preventDefault();
                     zeileMausRunter(index, ev.shiftKey);
@@ -465,11 +465,11 @@ export function FragenListe({ fragen }: { fragen: AdminQuestion[] }) {
                     className="pointer-events-none"
                   />
                 </td>
-                <td className="truncate px-3 py-2">{f.modul}</td>
-                <td className="truncate px-3 py-2">{f.kurs}</td>
-                <td className="px-3 py-2">{f.teil}</td>
-                <td className="truncate px-3 py-2">{f.frage}</td>
-                <td className="px-3 py-2">
+                <td className="truncate px-2 py-1.5" title={f.modul}>{f.modul}</td>
+                <td className="truncate px-2 py-1.5" title={f.kurs}>{f.kurs}</td>
+                <td className="px-2 py-1.5">{f.teil}</td>
+                <td className="truncate px-2 py-1.5" title={f.frage}>{f.frage}</td>
+                <td className="px-2 py-1.5">
                   <div className="flex items-center gap-1.5">
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -487,7 +487,7 @@ export function FragenListe({ fragen }: { fragen: AdminQuestion[] }) {
                     )}
                   </div>
                 </td>
-                <td className="px-3 py-2">
+                <td className="px-2 py-1.5">
                   <button
                     type="button"
                     disabled={toggeltId === f.id}
@@ -501,7 +501,7 @@ export function FragenListe({ fragen }: { fragen: AdminQuestion[] }) {
                     {istGeprueft(f) ? "Geprüft ✓" : "Ungeprüft"}
                   </button>
                 </td>
-                <td className="sticky right-0 whitespace-nowrap border-l border-zinc-200 bg-white px-3 py-2 text-right">
+                <td className="sticky right-0 whitespace-nowrap border-l border-zinc-200 bg-white px-2 py-1.5 text-right">
                   <Link href={`/admin/fragen/${f.id}`} className="mr-3 text-sm hover:underline">
                     Bearbeiten
                   </Link>

@@ -55,18 +55,18 @@ export function WartezeitMeldungenListe({ meldungen }: { meldungen: WartezeitMel
           <table className="w-full text-left text-sm">
             <thead className="bg-zinc-50">
               <tr>
-                <th className="px-3 py-2">Quelle</th>
-                <th className="px-3 py-2">Antragsdatum</th>
-                <th className="px-3 py-2">Rechnung erhalten</th>
-                <th className="px-3 py-2">Prüfungstermin</th>
-                <th className="px-3 py-2">Erstellt</th>
-                <th className="px-3 py-2"></th>
+                <th className="px-2 py-1.5">Quelle</th>
+                <th className="px-2 py-1.5">Antragsdatum</th>
+                <th className="px-2 py-1.5">Rechnung erhalten</th>
+                <th className="px-2 py-1.5">Prüfungstermin</th>
+                <th className="px-2 py-1.5">Erstellt</th>
+                <th className="px-2 py-1.5"></th>
               </tr>
             </thead>
             <tbody>
               {gefiltert.map((m) => (
                 <tr key={m.id} className="border-t border-zinc-100">
-                  <td className="px-3 py-2">
+                  <td className="px-2 py-1.5">
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                         m.quelle_typ === "telegram"
@@ -77,17 +77,17 @@ export function WartezeitMeldungenListe({ meldungen }: { meldungen: WartezeitMel
                       {m.quelle_typ === "telegram" ? "Telegram" : "Nutzer"}
                     </span>
                   </td>
-                  <td className="px-3 py-2">{formatDatum(m.antrag_datum)}</td>
-                  <td className="px-3 py-2">
+                  <td className="px-2 py-1.5">{formatDatum(m.antrag_datum)}</td>
+                  <td className="px-2 py-1.5">
                     {m.rechnung_erhalten ? formatDatum(m.rechnung_datum) : "—"}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-2 py-1.5">
                     {m.termin_erhalten ? formatDatum(m.pruefungsdatum) : "—"}
                   </td>
-                  <td className="px-3 py-2 text-zinc-500">
+                  <td className="px-2 py-1.5 text-zinc-500">
                     {new Date(m.erstellt_am).toLocaleDateString("de-DE")}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-right">
+                  <td className="whitespace-nowrap px-2 py-1.5 text-right">
                     <button
                       type="button"
                       disabled={loeschtId === m.id}

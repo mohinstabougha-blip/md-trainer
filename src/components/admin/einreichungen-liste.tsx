@@ -491,10 +491,19 @@ export function EinreichungenListe({
       )}
 
       <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
+        <table className="w-full text-left text-sm" style={{ tableLayout: "fixed" }}>
+          <colgroup>
+            <col style={{ width: 34 }} />
+            <col style={{ width: 116 }} />
+            <col style={{ width: 150 }} />
+            <col style={{ width: 40 }} />
+            <col />
+            <col style={{ width: 84 }} />
+            <col style={{ width: 92 }} />
+          </colgroup>
           <thead className="bg-zinc-50">
             <tr>
-              <th className="w-10 px-3 py-2">
+              <th className="px-2 py-1.5">
                 <input
                   type="checkbox"
                   checked={alleAusgewaehlt}
@@ -502,18 +511,18 @@ export function EinreichungenListe({
                   aria-label="Alle Einreichungen auswählen"
                 />
               </th>
-              <th className="px-3 py-2">Modul</th>
-              <th className="px-3 py-2">Kurs</th>
-              <th className="w-14 px-3 py-2">Teil</th>
-              <th className="px-3 py-2">Frage</th>
-              <th className="px-3 py-2">Quelle</th>
-              <th className="w-24 px-3 py-2"></th>
+              <th className="px-2 py-1.5">Modul</th>
+              <th className="px-2 py-1.5">Kurs</th>
+              <th className="w-14 px-2 py-1.5">Teil</th>
+              <th className="px-2 py-1.5">Frage</th>
+              <th className="px-2 py-1.5">Quelle</th>
+              <th className="w-24 px-2 py-1.5"></th>
             </tr>
           </thead>
           <tbody>
             {gefiltert.length === 0 && (
               <tr className="border-t border-zinc-100">
-                <td colSpan={7} className="px-3 py-6 text-center text-sm text-zinc-500">
+                <td colSpan={7} className="px-2 py-6 text-center text-sm text-zinc-500">
                   Keine Einreichung passt zu den Filtern.
                 </td>
               </tr>
@@ -526,7 +535,7 @@ export function EinreichungenListe({
                     className={`border-t border-zinc-100 ${ausgewaehlt.has(e.id) ? "bg-accent/5" : ""}`}
                   >
                     <td
-                      className="cursor-pointer select-none px-3 py-2 align-top"
+                      className="cursor-pointer select-none px-2 py-1.5 align-top"
                       onMouseDown={(ev) => {
                         ev.preventDefault();
                         zeileMausRunter(index, ev.shiftKey);
@@ -542,11 +551,11 @@ export function EinreichungenListe({
                         className="pointer-events-none"
                       />
                     </td>
-                    <td className="max-w-[150px] truncate px-3 py-2 align-top">{e.modul ?? "—"}</td>
-                    <td className="max-w-[200px] truncate px-3 py-2 align-top">{e.kurs ?? "—"}</td>
-                    <td className="px-3 py-2 align-top">{e.teil ?? "—"}</td>
-                    <td className="max-w-[360px] px-3 py-2 align-top">
-                      <div className="truncate">
+                    <td className="truncate px-2 py-1.5 align-top" title={e.modul ?? undefined}>{e.modul ?? "—"}</td>
+                    <td className="truncate px-2 py-1.5 align-top" title={e.kurs ?? undefined}>{e.kurs ?? "—"}</td>
+                    <td className="px-2 py-1.5 align-top">{e.teil ?? "—"}</td>
+                    <td className="overflow-hidden px-2 py-1.5 align-top">
+                      <div className="truncate" title={e.frage ?? undefined}>
                         {e.typ === "protokoll" && !e.frage ? (
                           <span className="text-zinc-400">(Protokoll)</span>
                         ) : (
@@ -562,7 +571,7 @@ export function EinreichungenListe({
                         </div>
                       )}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2 align-top">
+                    <td className="whitespace-nowrap px-2 py-1.5 align-top">
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                           e.quelle_typ === "telegram"
@@ -573,7 +582,7 @@ export function EinreichungenListe({
                         {QUELLE_LABEL[e.quelle_typ]}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-right align-top">
+                    <td className="px-2 py-1.5 text-right align-top">
                       <button
                         type="button"
                         onClick={() => setOffeneId(offen ? null : e.id)}
@@ -585,7 +594,7 @@ export function EinreichungenListe({
                   </tr>
                   {offen && (
                     <tr className="border-t border-zinc-100 bg-zinc-50">
-                      <td colSpan={7} className="px-3 py-3">
+                      <td colSpan={7} className="px-2.5 py-3">
                         <EinreichungKarte e={e} namen={namen} treffer={duplikate[e.id]} />
                       </td>
                     </tr>
