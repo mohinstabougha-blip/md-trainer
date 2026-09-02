@@ -38,17 +38,13 @@ export async function verifyTurnstileDetailliert(
     return { ok: false, fehlercodes: ["missing-input-response"] };
   }
 
-  const secretTrim = secret.trim();
   try {
-    const form = new URLSearchParams({ secret: secretTrim, response: token.trim() });
+    const form = new URLSearchParams({ secret: secret.trim(), response: token.trim() });
     const res = await fetch(SITEVERIFY_URL, { method: "POST", body: form });
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       console.error("Turnstile siteverify HTTP", res.status, body.slice(0, 200));
-      return {
-        ok: false,
-        fehlercodes: [`http-${res.status}`, `secretLen=${secretTrim.length}`, body.slice(0, 120)],
-      };
+      return { ok: false, fehlercodes: [`http-${res.status}`] };
     }
     const data = (await res.json()) as { success?: boolean; "error-codes"?: string[] };
     if (data.success !== true) {

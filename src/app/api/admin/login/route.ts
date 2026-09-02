@@ -8,11 +8,9 @@ export async function POST(request: Request) {
 
   const turnstile = await verifyTurnstileDetailliert(body?.turnstileToken, clientIp(request));
   if (!turnstile.ok) {
-    const detail = turnstile.fehlercodes?.join(", ");
-    return NextResponse.json(
-      { error: detail ? `Bot-Schutz fehlgeschlagen (${detail})` : "Bot-Schutz fehlgeschlagen" },
-      { status: 403 }
-    );
+    // Grund nur ins Server-Log (Vercel), nicht in die Antwort.
+    console.error("Admin-Login: Turnstile abgelehnt:", turnstile.fehlercodes);
+    return NextResponse.json({ error: "Bot-Schutz fehlgeschlagen" }, { status: 403 });
   }
 
   if (!process.env.ADMIN_PASSWORD) {
