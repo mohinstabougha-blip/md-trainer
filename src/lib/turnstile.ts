@@ -20,18 +20,30 @@ export function clientIp(request: Request): string | null {
 }
 
 export async function verifyTurnstile(token: unknown, remoteip?: string | null): Promise<boolean> {
+  // remoteip wird bewusst NICHT mehr an Cloudflare übergeben: hinter Vercel/
+  // Cloudflare stimmt die weitergereichte IP häufig nicht mit der überein, die
+  // die Challenge gelöst hat, was zu success:false führt. Der Parameter bleibt
+  // aus Kompatibilität in der Signatur erhalten.
+  void remoteip;
+
   const secret = process.env.TURNSTILE_SECRET_KEY;
   if (!secret) return true; // nicht konfiguriert -> kein Blockieren
   if (typeof token !== "string" || token.trim() === "") return false;
 
   try {
-    const form = new URLSearchParams({ secret, response: token });
-    if (remoteip) form.set("remoteip", remoteip);
+    const form = new URLSearchParams({ secret: secret.trim(), response: token.trim() });
     const res = await fetch(SITEVERIFY_URL, { method: "POST", body: form });
-    if (!res.ok) return false;
-    const data = (await res.json()) as { success?: boolean };
+    if (!res.ok) {
+      console.error("Turnstile siteverify HTTP", res.status);
+      return false;
+    }
+    const data = (await res.json()) as { success?: boolean; "error-codes"?: string[] };
+    if (data.success !== true) {
+      console.error("Turnstile abgelehnt:", data["error-codes"]);
+    }
     return data.success === true;
-  } catch {
+  } catch (err) {
+    console.error("Turnstile siteverify Fehler:", err);
     return false;
   }
 }
