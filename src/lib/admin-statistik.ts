@@ -121,3 +121,87 @@ export async function getAdminStatistik(): Promise<AdminStatistik> {
     standIso: new Date().toISOString(),
   };
 }
+
+// ── Nutzerliste ─────────────────────────────────────────────────────────────
+
+export type NutzerZeile = {
+  userId: string;
+  email: string | null;
+  anzeigename: string | null;
+  registriertAm: string; // ISO
+  sessions: number;
+  sessionsAbgeschlossen: number;
+  beantworteteFragen: number;
+  module: string[]; // geübte Module, alphabetisch
+};
+
+/** Alle registrierten Nutzer mit Aktivitätskennzahlen (nur Adminbereich). */
+export async function getNutzerListe(): Promise<NutzerZeile[]> {
+  const supabase = createAdminClient();
+
+  // auth.users durchpaginieren
+  const users: { id: string; email: string | null; created_at: string }[] = [];
+  const perPage = 200;
+  for (let page = 1; page <= 100; page++) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage });
+    if (error) throw error;
+    for (const u of data.users) {
+      users.push({ id: u.id, email: u.email ?? null, created_at: u.created_at });
+    }
+    if (data.users.length < perPage) break;
+  }
+
+  const [profileRes, sessionsRes, resultsRes, questionsRes] = await Promise.all([
+    supabase.from("profile").select("user_id, anzeigename"),
+    supabase.from("sessions").select("user_id, status"),
+    supabase.from("results").select("user_id, question_id"),
+    supabase.from("questions").select("id, modul"),
+  ]);
+  for (const r of [profileRes, sessionsRes, resultsRes, questionsRes]) {
+    if (r.error) throw r.error;
+  }
+
+  const anzeigename = new Map<string, string>();
+  for (const p of profileRes.data ?? []) anzeigename.set(p.user_id, p.anzeigename);
+
+  const modulVonFrage = new Map<number, string>();
+  for (const q of questionsRes.data ?? []) modulVonFrage.set(q.id, q.modul);
+
+  type Agg = { s: number; sa: number; f: number; module: Set<string> };
+  const proNutzer = new Map<string, Agg>();
+  const agg = (id: string): Agg => {
+    let x = proNutzer.get(id);
+    if (!x) {
+      x = { s: 0, sa: 0, f: 0, module: new Set() };
+      proNutzer.set(id, x);
+    }
+    return x;
+  };
+  for (const se of sessionsRes.data ?? []) {
+    const x = agg(se.user_id);
+    x.s++;
+    if (se.status === "abgeschlossen") x.sa++;
+  }
+  for (const re of resultsRes.data ?? []) {
+    const x = agg(re.user_id);
+    x.f++;
+    const m = modulVonFrage.get(re.question_id);
+    if (m) x.module.add(m);
+  }
+
+  return users
+    .map((u) => {
+      const x = proNutzer.get(u.id);
+      return {
+        userId: u.id,
+        email: u.email,
+        anzeigename: anzeigename.get(u.id) ?? null,
+        registriertAm: u.created_at,
+        sessions: x?.s ?? 0,
+        sessionsAbgeschlossen: x?.sa ?? 0,
+        beantworteteFragen: x?.f ?? 0,
+        module: x ? [...x.module].sort((a, b) => a.localeCompare(b, "de")) : [],
+      };
+    })
+    .sort((a, b) => Date.parse(b.registriertAm) - Date.parse(a.registriertAm));
+}

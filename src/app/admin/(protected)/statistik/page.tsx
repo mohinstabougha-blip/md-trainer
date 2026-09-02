@@ -1,4 +1,5 @@
-import { getAdminStatistik, type Zeitreihe } from "@/lib/admin-statistik";
+import { getAdminStatistik, getNutzerListe, type Zeitreihe } from "@/lib/admin-statistik";
+import { NutzerTabelle } from "@/components/admin/nutzer-tabelle";
 
 export const dynamic = "force-dynamic";
 
@@ -31,10 +32,10 @@ function Zeile({
 }
 
 export default async function StatistikPage() {
-  const s = await getAdminStatistik();
+  const [s, nutzer] = await Promise.all([getAdminStatistik(), getNutzerListe()]);
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="mx-auto flex max-w-4xl flex-col gap-6">
       <div>
         <h1 className="text-xl font-semibold">Statistik</h1>
         <p className="mt-1 text-sm text-zinc-500">
@@ -69,6 +70,8 @@ export default async function StatistikPage() {
         <span className="font-medium text-zinc-700">Offene Einreichungen</span>
         <span className="tabular-nums">{s.offeneEinreichungen}</span>
       </div>
+
+      <NutzerTabelle nutzer={nutzer} />
 
       <p className="rounded-xl bg-amber-50 p-3 text-xs text-amber-900">
         Nicht angemeldete Besucher (Gäste) haben kein Konto und keine Session in der
