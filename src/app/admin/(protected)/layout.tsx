@@ -6,6 +6,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-zinc-50">
       <header className="flex items-center justify-between border-b border-zinc-100 bg-white px-6 py-3">
         <nav className="flex gap-4 text-sm font-medium">
+          <Link href="/admin/statistik" className="hover:underline">
+            Statistik
+          </Link>
           <Link href="/admin/fragen" className="hover:underline">
             Fragen
           </Link>

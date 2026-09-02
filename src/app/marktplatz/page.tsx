@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AngeboteListe } from "@/components/marktplatz/angebote-liste";
+import { BeispielAngebote } from "@/components/marktplatz/beispiel-angebote";
 import { Rechtshinweis } from "@/components/marktplatz/rechtshinweis";
 import {
   getAngeboteFuerUebersicht,
@@ -43,6 +44,7 @@ export default async function MarktplatzPage() {
             </div>
           ))}
         </div>
+        <BeispielAngebote anzeigen={titel.length < 8} />
       </div>
     );
   }
@@ -60,6 +62,7 @@ export default async function MarktplatzPage() {
       </div>
       <Rechtshinweis />
       <AngeboteListe angebote={angebote} aktuelleUserId={user.id} namen={namen} />
+      <BeispielAngebote anzeigen={angebote.filter((a) => a.status === "aktiv").length < 8} />
     </div>
   );
 }
