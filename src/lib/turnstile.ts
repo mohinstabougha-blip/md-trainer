@@ -19,7 +19,13 @@ export function clientIp(request: Request): string | null {
   return request.headers.get("cf-connecting-ip") || request.headers.get("x-real-ip") || null;
 }
 
-export async function verifyTurnstile(token: unknown, remoteip?: string | null): Promise<boolean> {
+export type TurnstileErgebnis = { ok: boolean; fehlercodes?: string[] };
+
+/** Wie verifyTurnstile, gibt aber zusätzlich die Cloudflare-Fehlercodes zurück. */
+export async function verifyTurnstileDetailliert(
+  token: unknown,
+  remoteip?: string | null
+): Promise<TurnstileErgebnis> {
   // remoteip wird bewusst NICHT mehr an Cloudflare übergeben: hinter Vercel/
   // Cloudflare stimmt die weitergereichte IP häufig nicht mit der überein, die
   // die Challenge gelöst hat, was zu success:false führt. Der Parameter bleibt
@@ -27,23 +33,30 @@ export async function verifyTurnstile(token: unknown, remoteip?: string | null):
   void remoteip;
 
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return true; // nicht konfiguriert -> kein Blockieren
-  if (typeof token !== "string" || token.trim() === "") return false;
+  if (!secret) return { ok: true }; // nicht konfiguriert -> kein Blockieren
+  if (typeof token !== "string" || token.trim() === "") {
+    return { ok: false, fehlercodes: ["missing-input-response"] };
+  }
 
   try {
     const form = new URLSearchParams({ secret: secret.trim(), response: token.trim() });
     const res = await fetch(SITEVERIFY_URL, { method: "POST", body: form });
     if (!res.ok) {
       console.error("Turnstile siteverify HTTP", res.status);
-      return false;
+      return { ok: false, fehlercodes: [`http-${res.status}`] };
     }
     const data = (await res.json()) as { success?: boolean; "error-codes"?: string[] };
     if (data.success !== true) {
       console.error("Turnstile abgelehnt:", data["error-codes"]);
+      return { ok: false, fehlercodes: data["error-codes"] ?? ["unknown"] };
     }
-    return data.success === true;
+    return { ok: true };
   } catch (err) {
     console.error("Turnstile siteverify Fehler:", err);
-    return false;
+    return { ok: false, fehlercodes: ["fetch-error"] };
   }
+}
+
+export async function verifyTurnstile(token: unknown, remoteip?: string | null): Promise<boolean> {
+  return (await verifyTurnstileDetailliert(token, remoteip)).ok;
 }

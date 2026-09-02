@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
 import { ADMIN_COOKIE_NAME, adminSessionToken } from "@/lib/admin-auth";
-import { verifyTurnstile, clientIp } from "@/lib/turnstile";
+import { verifyTurnstileDetailliert, clientIp } from "@/lib/turnstile";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const password = body?.password;
 
-  if (!(await verifyTurnstile(body?.turnstileToken, clientIp(request)))) {
-    return NextResponse.json({ error: "Bot-Schutz fehlgeschlagen" }, { status: 403 });
+  const turnstile = await verifyTurnstileDetailliert(body?.turnstileToken, clientIp(request));
+  if (!turnstile.ok) {
+    const detail = turnstile.fehlercodes?.join(", ");
+    return NextResponse.json(
+      { error: detail ? `Bot-Schutz fehlgeschlagen (${detail})` : "Bot-Schutz fehlgeschlagen" },
+      { status: 403 }
+    );
   }
 
   if (!process.env.ADMIN_PASSWORD) {
