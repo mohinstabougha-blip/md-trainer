@@ -3,7 +3,9 @@ import { StartScreen } from "@/components/start-screen";
 import { AppHeader } from "@/components/app-header";
 import { WartezeitBadge } from "@/components/wartezeit-bereich";
 import { FortschrittUebersicht } from "@/components/fortschritt-uebersicht";
+import { UpdateBanner } from "@/components/update-banner";
 import { getAlleFragenMeta } from "@/lib/questions";
+import { getUpdateInfo } from "@/lib/updates";
 import { createClient } from "@/lib/supabase/server";
 import {
   getWartezeitDurchschnitt,
@@ -22,6 +24,7 @@ export default async function Home() {
 
   const [
     fragenMeta,
+    updateInfo,
     wartezeitDurchschnitt,
     wartezeitVerlauf,
     meineMeldungResult,
@@ -30,6 +33,7 @@ export default async function Home() {
     meineBewertungen,
   ] = await Promise.all([
     getAlleFragenMeta(),
+    getUpdateInfo(),
     getWartezeitDurchschnitt(),
     getWartezeitVerlauf(),
     user
@@ -42,6 +46,7 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 pb-20 sm:pb-0">
+      <UpdateBanner info={updateInfo} />
       <AppHeader
         email={user?.email ?? undefined}
         ungeleseneNachrichten={ungeleseneNachrichten}

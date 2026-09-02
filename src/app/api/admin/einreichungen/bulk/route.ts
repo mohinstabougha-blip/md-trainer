@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // Sammel-Aktionen für die Einreichungs-Warteschlange:
@@ -106,6 +107,7 @@ export async function PATCH(request: Request) {
       if (updateFehler) {
         return NextResponse.json({ error: updateFehler.message }, { status: 500 });
       }
+      revalidateTag("updates", { expire: 0 });
     }
 
     return NextResponse.json({ freigegeben: freizugebendeIds.length, uebersprungen });
