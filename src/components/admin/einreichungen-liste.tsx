@@ -8,14 +8,24 @@ import type { DuplikatTreffer } from "@/lib/duplikat-check";
 import { useZeilenAuswahl } from "@/components/admin/use-zeilen-auswahl";
 import { BildFeld } from "@/components/admin/bild-feld";
 
-function DuplikatBadge({ score }: { score: number }) {
+function DuplikatBadge({ score, onClick }: { score: number; onClick?: () => void }) {
+  const text = `⚠ mögl. Duplikat ${Math.round(score * 100)} %`;
+  if (!onClick) {
+    return (
+      <span className="whitespace-nowrap rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+        {text}
+      </span>
+    );
+  }
   return (
-    <span
-      title={`Textähnlichkeit ${Math.round(score * 100)} % zu einer bestehenden Frage`}
-      className="whitespace-nowrap rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
+    <button
+      type="button"
+      onClick={onClick}
+      title="Nur mögliche Duplikate anzeigen"
+      className="whitespace-nowrap rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 hover:bg-amber-200"
     >
-      ⚠ mögl. Duplikat {Math.round(score * 100)} %
-    </span>
+      {text}
+    </button>
   );
 }
 
@@ -545,7 +555,10 @@ export function EinreichungenListe({
                       </div>
                       {duplikate[e.id] && (
                         <div className="mt-1">
-                          <DuplikatBadge score={duplikate[e.id].score} />
+                          <DuplikatBadge
+                            score={duplikate[e.id].score}
+                            onClick={() => setNurDuplikate(true)}
+                          />
                         </div>
                       )}
                     </td>
