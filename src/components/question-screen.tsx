@@ -6,6 +6,7 @@ import type { Bewertung } from "@/lib/bewertung-types";
 import { FeedbackForm } from "@/components/feedback-form";
 import { AntwortKommentare } from "@/components/antwort-kommentare";
 import { MusterantwortText } from "@/components/musterantwort-text";
+import { StrukturierterText } from "@/components/strukturierter-text";
 import { FrageMenu } from "@/components/frage-menu";
 import { setGastBewertung } from "@/lib/gast-fortschritt";
 
@@ -170,8 +171,10 @@ export function QuestionScreen({
             }}
             className="kp-card absolute inset-0 flex cursor-pointer flex-col gap-4 overflow-y-auto [backface-visibility:hidden]"
           >
-            <span className="text-xs font-medium uppercase tracking-wide text-zinc-400">Frage</span>
-            <p className="text-lg leading-relaxed">{question.frage}</p>
+            <span className="inline-block self-start rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-accent">
+              Frage
+            </span>
+            <StrukturierterText text={question.frage} className="text-lg" />
             {question.bild_frage_url && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -197,7 +200,7 @@ export function QuestionScreen({
             }}
             className="kp-card absolute inset-0 flex cursor-pointer flex-col gap-3 overflow-y-auto [backface-visibility:hidden] [transform:rotateY(180deg)]"
           >
-            <span className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+            <span className="inline-block self-start rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-violet-700">
               Musterantwort
             </span>
             {status === "laden" && (

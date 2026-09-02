@@ -50,15 +50,19 @@ export function musterantwortFuerAnzeige(text: string): string {
  * zurück (für eine Listen-Darstellung statt eines einzelnen Textblocks).
  */
 export function musterantwortSaetze(text: string): string[] {
-  const mitZeilenumbruechen = text.replace(
-    /(\S*)\.\s+(?=[A-ZÄÖÜ])/g,
-    (treffer, wortDavor: string) => {
-      if (NUR_ZAHL.test(wortDavor)) return treffer;
-      const bereinigt = wortDavor.toLowerCase().replace(/[(),;:„"]/g, "");
-      if (ABKUERZUNGEN.has(bereinigt)) return treffer;
+  const mitZeilenumbruechen = text
+    // Satzende: Punkt / Frage- / Ausrufezeichen + Leerzeichen + Großbuchstabe.
+    .replace(/(\S*)([.?!])\s+(?=[A-ZÄÖÜ])/g, (treffer, wortDavor: string, zeichen: string) => {
+      if (zeichen === ".") {
+        if (NUR_ZAHL.test(wortDavor)) return treffer;
+        const bereinigt = wortDavor.toLowerCase().replace(/[(),;:„"]/g, "");
+        if (ABKUERZUNGEN.has(bereinigt)) return treffer;
+      }
       return treffer.trimEnd() + "\n";
-    }
-  );
+    })
+    // zusätzlich vor einem GROSSBUCHSTABEN-Abschnittslabel umbrechen
+    // (z.B. "... bekannt? KU: ..." oder "..., DD: ...").
+    .replace(/([,;)\s])(?=[A-ZÄÖÜ][A-ZÄÖÜ0-9 .\/()–-]{0,24}?:\s)/g, "$1\n");
   return mitZeilenumbruechen
     .split("\n")
     .map((satz) => satz.trim())
