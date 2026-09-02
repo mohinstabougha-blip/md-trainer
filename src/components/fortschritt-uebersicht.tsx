@@ -40,7 +40,9 @@ function gastStats(alleFragen: FrageMeta[]): ModulFortschritt[] {
     }
     map.set(f.modul, stat);
   }
-  return [...map.values()].sort((a, b) => a.modul.localeCompare(b.modul, "de"));
+  return [...map.values()].sort(
+    (a, b) => b.gesamt - a.gesamt || a.modul.localeCompare(b.modul, "de")
+  );
 }
 
 export function FortschrittUebersicht({

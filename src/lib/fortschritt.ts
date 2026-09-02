@@ -57,7 +57,10 @@ export async function getFortschrittProModul(userId: string): Promise<ModulForts
     map.set(f.modul, stat);
   }
 
-  return [...map.values()].sort((a, b) => a.modul.localeCompare(b.modul, "de"));
+  // Module mit den meisten Fragen zuerst, bei Gleichstand alphabetisch.
+  return [...map.values()].sort(
+    (a, b) => b.gesamt - a.gesamt || a.modul.localeCompare(b.modul, "de")
+  );
 }
 
 /** Für die neuen Fortschritts-Filter im Start-Screen (E4): question_id -> Bewertung
