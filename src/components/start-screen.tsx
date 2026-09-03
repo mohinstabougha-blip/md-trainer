@@ -248,11 +248,11 @@ function PickerOverlay({
 }) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-t-2xl bg-white p-4 shadow-lg sm:rounded-2xl"
+        className="flex max-h-[85vh] w-full max-w-sm flex-col rounded-2xl bg-white p-4 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-2 flex items-center justify-between">
@@ -261,7 +261,7 @@ function PickerOverlay({
             Fertig
           </button>
         </div>
-        {children}
+        <div className="overflow-y-auto">{children}</div>
       </div>
     </div>
   );
