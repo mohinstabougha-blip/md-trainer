@@ -7,6 +7,7 @@ import { FeedbackForm } from "@/components/feedback-form";
 import { AntwortKommentare } from "@/components/antwort-kommentare";
 import { MusterantwortText } from "@/components/musterantwort-text";
 import { StrukturierterText } from "@/components/strukturierter-text";
+import { ZoombaresBild } from "@/components/zoombares-bild";
 import { FrageMenu } from "@/components/frage-menu";
 import { setGastBewertung } from "@/lib/gast-fortschritt";
 
@@ -181,7 +182,7 @@ export function QuestionScreen({
       {/* Flashcard: Vorderseite = Frage, Rückseite = Musterantwort */}
       <div className="[perspective:1400px]">
         <div
-          className="relative min-h-[19rem] transition-transform duration-500 [transform-style:preserve-3d]"
+          className="grid min-h-[19rem] transition-transform duration-500 [transform-style:preserve-3d]"
           style={{ transform: gedreht ? "rotateY(180deg)" : "rotateY(0deg)" }}
         >
           {/* Vorderseite */}
@@ -196,19 +197,14 @@ export function QuestionScreen({
                 karteDrehen();
               }
             }}
-            className="kp-card absolute inset-0 flex cursor-pointer flex-col gap-4 overflow-y-auto [backface-visibility:hidden]"
+            className="kp-card flex cursor-pointer flex-col gap-4 [backface-visibility:hidden] [grid-area:1/1]"
           >
             <span className="inline-block self-start rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-accent">
               Frage
             </span>
             <StrukturierterText text={question.frage} className="text-lg" />
             {question.bild_frage_url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={question.bild_frage_url}
-                alt="Bild zur Frage"
-                className="max-w-full rounded-xl"
-              />
+              <ZoombaresBild src={question.bild_frage_url} alt="Bild zur Frage" />
             )}
             <span className="mt-auto pt-2 text-sm text-accent">Tippen zum Umdrehen →</span>
           </div>
@@ -225,7 +221,7 @@ export function QuestionScreen({
                 karteDrehen();
               }
             }}
-            className="kp-card absolute inset-0 flex cursor-pointer flex-col gap-3 overflow-y-auto [backface-visibility:hidden] [transform:rotateY(180deg)]"
+            className="kp-card flex cursor-pointer flex-col gap-3 [backface-visibility:hidden] [grid-area:1/1] [transform:rotateY(180deg)]"
           >
             <span className="inline-block self-start rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-violet-700">
               Musterantwort
@@ -255,11 +251,9 @@ export function QuestionScreen({
                   className="text-sm leading-relaxed"
                 />
                 {musterantwortErgebnis.bildAntwortUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <ZoombaresBild
                     src={musterantwortErgebnis.bildAntwortUrl}
                     alt="Bild zur Musterantwort"
-                    className="max-w-full rounded-xl"
                   />
                 )}
               </>
