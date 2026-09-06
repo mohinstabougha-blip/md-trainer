@@ -3,8 +3,11 @@
   "configurations": [
     {
       "name": "kp-trainer-dev",
-      "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
-      "runtimeArgs": ["node_modules/next/dist/bin/next", "dev"],
+      "runtimeExecutable": "/bin/zsh",
+      "runtimeArgs": [
+        "-c",
+        "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; exec node node_modules/next/dist/bin/next dev --webpack"
+      ],
       "port": 3000
     }
   ]

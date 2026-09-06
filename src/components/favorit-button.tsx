@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { istGastFavorit, toggleGastFavorit } from "@/lib/favoriten";
 
-// Stern-Umschalter für "Frage zu Favoriten hinzufügen".
+// Umschalter "Frage zu Favoriten hinzufügen".
 // Gast  -> localStorage (kp_favoriten_v1)
 // Nutzer -> POST /api/favoriten { questionId, favorit }
 export function FavoritButton({
@@ -60,12 +60,14 @@ export function FavoritButton({
       onClick={umschalten}
       aria-pressed={favorit}
       aria-label={favorit ? "Aus Favoriten entfernen" : "Zu Favoriten hinzufügen"}
-      title={favorit ? "Aus Favoriten entfernen" : "Zu Favoriten hinzufügen"}
-      className={`text-lg leading-none transition-transform hover:scale-110 disabled:opacity-40 ${
-        favorit ? "text-amber-500" : "text-zinc-300 hover:text-amber-400"
+      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors disabled:opacity-40 ${
+        favorit
+          ? "border-amber-300 bg-amber-50 text-amber-700"
+          : "border-zinc-200 bg-white text-zinc-500 hover:border-amber-300 hover:text-amber-600"
       } ${className}`}
     >
-      {favorit ? "★" : "☆"}
+      <span className="text-sm leading-none">{favorit ? "★" : "☆"}</span>
+      {favorit ? "Gemerkt" : "Merken"}
     </button>
   );
 }
