@@ -28,7 +28,10 @@ export function FavoritButton({
     }
   }, [istGast, questionId]);
 
-  async function umschalten() {
+  async function umschalten(e: React.MouseEvent) {
+    // Der Button sitzt auf der klickbaren Karteikarte -> Klick nicht durchreichen,
+    // sonst würde die Karte umgedreht.
+    e.stopPropagation();
     if (speichert) return;
 
     if (istGast) {
@@ -58,6 +61,7 @@ export function FavoritButton({
     <button
       type="button"
       onClick={umschalten}
+      onKeyDown={(e) => e.stopPropagation()}
       aria-pressed={favorit}
       aria-label={favorit ? "Aus Favoriten entfernen" : "Zu Favoriten hinzufügen"}
       className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors disabled:opacity-40 ${

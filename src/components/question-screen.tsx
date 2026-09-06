@@ -138,11 +138,6 @@ export function QuestionScreen({
             ungeleseneNachrichten={ungeleseneNachrichten}
           />
           <div className="flex items-center gap-3">
-            <FavoritButton
-              questionId={question.id}
-              istGast={istGast}
-              initialFavorit={initialFavorit}
-            />
             <button
               type="button"
               aria-label="Problem melden"
@@ -207,9 +202,16 @@ export function QuestionScreen({
             }}
             className="kp-card flex cursor-pointer flex-col gap-4 [backface-visibility:hidden] [grid-area:1/1]"
           >
-            <span className="inline-block self-start rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-accent">
-              Frage
-            </span>
+            <div className="flex items-start justify-between gap-2">
+              <span className="inline-block rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-accent">
+                Frage
+              </span>
+              <FavoritButton
+                questionId={question.id}
+                istGast={istGast}
+                initialFavorit={initialFavorit}
+              />
+            </div>
             <StrukturierterText text={question.frage} className="text-lg" />
             {question.bild_frage_url && (
               <ZoombaresBild src={question.bild_frage_url} alt="Bild zur Frage" />
