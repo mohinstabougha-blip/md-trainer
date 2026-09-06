@@ -4,7 +4,9 @@ import { AppHeader } from "@/components/app-header";
 import { WartezeitBadge } from "@/components/wartezeit-bereich";
 import { FortschrittUebersicht } from "@/components/fortschritt-uebersicht";
 import { UpdateBanner } from "@/components/update-banner";
+import { WeitermachenKarte } from "@/components/weitermachen-karte";
 import { getAlleFragenMeta } from "@/lib/questions";
+import { getFavoritenIds } from "@/lib/favoriten-server";
 import { getUpdateInfo } from "@/lib/updates";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -31,6 +33,7 @@ export default async function Home() {
     ungeleseneNachrichten,
     modulFortschritt,
     meineBewertungen,
+    favoritenIds,
   ] = await Promise.all([
     getAlleFragenMeta(),
     getUpdateInfo(),
@@ -42,6 +45,7 @@ export default async function Home() {
     user ? getUngeleseneNachrichtenAnzahl(user.id) : Promise.resolve(0),
     user ? getFortschrittProModul(user.id) : Promise.resolve([]),
     user ? getMeineLetzteBewertungen(user.id) : Promise.resolve({}),
+    user ? getFavoritenIds(user.id) : Promise.resolve([]),
   ]);
 
   return (
@@ -69,6 +73,8 @@ export default async function Home() {
         />
       </div>
 
+      <WeitermachenKarte />
+
       <div className="mx-auto w-full max-w-xl pt-4">
         <FortschrittUebersicht
           stats={modulFortschritt}
@@ -80,6 +86,7 @@ export default async function Home() {
       <StartScreen
         fragenMeta={fragenMeta}
         meineBewertungen={meineBewertungen}
+        favoritenIds={favoritenIds}
         istGast={istGast}
       />
     </div>

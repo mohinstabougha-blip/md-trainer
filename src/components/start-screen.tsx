@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FrageMeta } from "@/lib/questions";
 import type { Bewertung } from "@/lib/bewertung-types";
 import { getGastBewertungen } from "@/lib/gast-fortschritt";
+import { getGastFavoriten } from "@/lib/favoriten";
 
 type Modus = "zufaellig" | "modul" | "kurs";
 type Teil = "1" | "2" | "3" | "voll";
@@ -270,19 +272,25 @@ function PickerOverlay({
 export function StartScreen({
   fragenMeta,
   meineBewertungen,
+  favoritenIds = [],
   istGast = false,
 }: {
   fragenMeta: FrageMeta[];
   meineBewertungen: Record<number, Bewertung>;
+  favoritenIds?: number[];
   istGast?: boolean;
 }) {
   const router = useRouter();
   // Gast: Fortschritt liegt im localStorage, wird erst nach dem Mounten geladen.
   const [bewertungen, setBewertungen] = useState<Record<number, Bewertung>>(meineBewertungen);
+  const [favoriten, setFavoriten] = useState<number[]>(favoritenIds);
   useEffect(() => {
     // localStorage ist beim SSR nicht verfügbar -> erst nach dem Mounten lesen.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (istGast) setBewertungen(getGastBewertungen());
+    if (istGast) {
+      /* eslint-disable-next-line react-hooks/set-state-in-effect */
+      setBewertungen(getGastBewertungen());
+      setFavoriten(getGastFavoriten());
+    }
   }, [istGast]);
 
   const [modus, setModus] = useState<Modus>("zufaellig");
@@ -418,6 +426,31 @@ export function StartScreen({
           ? `${verfuegbareAnzahl} Frage${verfuegbareAnzahl === 1 ? "" : "n"} starten`
           : "Bitte Fächer auswählen"}
       </button>
+
+      {favoriten.length > 0 && (
+        <div className="kp-card mt-1 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-amber-500">★</span>
+            <span className="text-sm font-medium text-zinc-900">
+              {favoriten.length} Favorit{favoriten.length === 1 ? "" : "en"}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Link
+              href={`/session?modus=ids&ids=${favoriten.join(",")}&teil=voll&sortierung=zufaellig`}
+              className="flex-1 rounded-full bg-accent px-3 py-2 text-center text-sm font-semibold text-white"
+            >
+              Als Karteikarten üben
+            </Link>
+            <Link
+              href="/favoriten"
+              className="flex-1 rounded-full bg-zinc-100 px-3 py-2 text-center text-sm font-semibold text-zinc-700 hover:bg-zinc-200"
+            >
+              Mit Antworten ansehen
+            </Link>
+          </div>
+        </div>
+      )}
 
       {offenerPicker === "faecher" && (
         <PickerOverlay titel="Fächer" onClose={() => setOffenerPicker(null)}>

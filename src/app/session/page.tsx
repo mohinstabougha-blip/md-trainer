@@ -9,6 +9,7 @@ import {
   type Teil,
 } from "@/lib/questions";
 import { getUngeleseneNachrichtenAnzahl } from "@/lib/marktplatz";
+import { getFavoritenIds } from "@/lib/favoriten-server";
 import { createClient } from "@/lib/supabase/server";
 import { ADMIN_COOKIE_NAME, isValidAdminToken } from "@/lib/admin-auth";
 
@@ -36,7 +37,26 @@ function parseFilter(params: SearchParams): SessionFilter {
     }
     return { modus: "kurse", kurse };
   }
+  if (modus === "ids") {
+    const ids = String(params.ids ?? "")
+      .split(",")
+      .map((s) => Number(s))
+      .filter((n) => Number.isInteger(n));
+    return { modus: "ids", ids };
+  }
   return { modus: "zufaellig" };
+}
+
+/** Baut die URL, mit der genau dieser Lauf fortgesetzt werden kann. */
+function baueResumeHref(params: SearchParams): string {
+  const usp = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (k === "resume" || v == null) continue;
+    if (Array.isArray(v)) v.forEach((x) => usp.append(k, x));
+    else usp.set(k, v);
+  }
+  usp.set("resume", "1");
+  return `/session?${usp.toString()}`;
 }
 
 export default async function SessionPage({
@@ -51,15 +71,17 @@ export default async function SessionPage({
   const fortschrittFilter = (
     params.fortschritt ? String(params.fortschritt) : "alle"
   ) as FortschrittFilter;
+  const resume = params.resume === "1";
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [questions, ungeleseneNachrichten, cookieStore] = await Promise.all([
+  const [questions, ungeleseneNachrichten, favoritenIds, cookieStore] = await Promise.all([
     getSessionQuestions(filter, teil, sortierung, fortschrittFilter, user?.id),
     user ? getUngeleseneNachrichtenAnzahl(user.id) : Promise.resolve(0),
+    user ? getFavoritenIds(user.id) : Promise.resolve([]),
     cookies(),
   ]);
 
@@ -80,6 +102,9 @@ export default async function SessionPage({
         istAdmin={istAdmin}
         istGast={!user}
         ungeleseneNachrichten={ungeleseneNachrichten}
+        favoritenIds={favoritenIds}
+        resume={resume}
+        resumeHref={baueResumeHref(params)}
       />
     </div>
   );

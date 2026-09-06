@@ -34,7 +34,8 @@ export type SessionFilter =
   | { modus: "zufaellig" }
   | { modus: "modul"; module: string[] }
   | { modus: "kurs"; modul: string; kurs: string }
-  | { modus: "kurse"; kurse: ModulKurs[] };
+  | { modus: "kurse"; kurse: ModulKurs[] }
+  | { modus: "ids"; ids: number[] };
 
 export type SessionQuestion = {
   id: number;
@@ -73,9 +74,13 @@ export async function getSessionQuestions(
     query = query.in("modul", filter.module);
   } else if (filter.modus === "kurs") {
     query = query.eq("modul", filter.modul).eq("kurs", filter.kurs);
+  } else if (filter.modus === "ids") {
+    query = query.in("id", filter.ids.length > 0 ? filter.ids : [-1]);
   }
 
-  if (teil !== "voll") {
+  // Bei einer festen ID-Liste (z.B. Favoriten) bleibt die vorgegebene
+  // Reihenfolge erhalten; Teil-Filter und Sortierung greifen nicht.
+  if (teil !== "voll" && filter.modus !== "ids") {
     query = query.eq("teil", Number(teil));
   }
 
@@ -119,28 +124,34 @@ export async function getSessionQuestions(
   }
 
   let sortiert;
-  switch (sortierung) {
-    case "neueste":
-      sortiert = [...pool].sort(
-        (a, b) => new Date(b.erstellt_am).getTime() - new Date(a.erstellt_am).getTime()
-      );
-      break;
-    case "aelteste":
-      sortiert = [...pool].sort(
-        (a, b) => new Date(a.erstellt_am).getTime() - new Date(b.erstellt_am).getTime()
-      );
-      break;
-    case "haeufigste":
-      sortiert = [...pool].sort((a, b) => b.haeufigkeit - a.haeufigkeit);
-      break;
-    default:
-      sortiert = shuffle(pool);
-  }
+  if (filter.modus === "ids") {
+    // Reihenfolge der übergebenen IDs beibehalten.
+    const rang = new Map(filter.ids.map((id, i) => [id, i]));
+    sortiert = [...pool].sort((a, b) => (rang.get(a.id) ?? 0) - (rang.get(b.id) ?? 0));
+  } else {
+    switch (sortierung) {
+      case "neueste":
+        sortiert = [...pool].sort(
+          (a, b) => new Date(b.erstellt_am).getTime() - new Date(a.erstellt_am).getTime()
+        );
+        break;
+      case "aelteste":
+        sortiert = [...pool].sort(
+          (a, b) => new Date(a.erstellt_am).getTime() - new Date(b.erstellt_am).getTime()
+        );
+        break;
+      case "haeufigste":
+        sortiert = [...pool].sort((a, b) => b.haeufigkeit - a.haeufigkeit);
+        break;
+      default:
+        sortiert = shuffle(pool);
+    }
 
-  // Vollsimulation: Teil 1, dann 2, dann 3 nacheinander (stabil, behält die
-  // oben gewählte Sortierung innerhalb jedes Teils bei).
-  if (teil === "voll") {
-    sortiert.sort((a, b) => a.teil - b.teil);
+    // Vollsimulation: Teil 1, dann 2, dann 3 nacheinander (stabil, behält die
+    // oben gewählte Sortierung innerhalb jedes Teils bei).
+    if (teil === "voll") {
+      sortiert.sort((a, b) => a.teil - b.teil);
+    }
   }
 
   return sortiert.map((q) => ({

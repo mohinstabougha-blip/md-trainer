@@ -9,6 +9,7 @@ import { MusterantwortText } from "@/components/musterantwort-text";
 import { StrukturierterText } from "@/components/strukturierter-text";
 import { ZoombaresBild } from "@/components/zoombares-bild";
 import { FrageMenu } from "@/components/frage-menu";
+import { FavoritButton } from "@/components/favorit-button";
 import { setGastBewertung } from "@/lib/gast-fortschritt";
 
 type MusterantwortResult = {
@@ -29,6 +30,7 @@ export function QuestionScreen({
   sessionId,
   istAdmin,
   istGast,
+  initialFavorit,
   ungeleseneNachrichten,
   onNext,
   onAbbrechen,
@@ -39,6 +41,7 @@ export function QuestionScreen({
   sessionId: string;
   istAdmin: boolean;
   istGast: boolean;
+  initialFavorit: boolean;
   ungeleseneNachrichten: number;
   onNext: (result: { antwort: string; bewertung: Bewertung | null }) => void;
   onAbbrechen: () => void;
@@ -135,6 +138,11 @@ export function QuestionScreen({
             ungeleseneNachrichten={ungeleseneNachrichten}
           />
           <div className="flex items-center gap-3">
+            <FavoritButton
+              questionId={question.id}
+              istGast={istGast}
+              initialFavorit={initialFavorit}
+            />
             <button
               type="button"
               aria-label="Problem melden"

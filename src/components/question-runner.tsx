@@ -8,8 +8,15 @@ import type { Bewertung, KursStat } from "@/lib/bewertung-types";
 import { QuestionScreen } from "@/components/question-screen";
 import { ErgebnisScreen } from "@/components/ergebnis-screen";
 import { getGastBewertungen } from "@/lib/gast-fortschritt";
+import {
+  getAktiveSession,
+  setAktiveSession,
+  clearAktiveSession,
+  type AktiveSession,
+} from "@/lib/aktive-session";
 
 type Ergebnis = { modul: string; kurs: string; bewertung: Bewertung };
+type Lauf = { fragen: SessionQuestion[]; startIndex: number; startErgebnisse: Ergebnis[] };
 
 function zuKursStats(ergebnisse: Ergebnis[]): KursStat[] {
   const map = new Map<string, KursStat>();
@@ -30,6 +37,41 @@ async function sessionStatusAendern(sessionId: string, status: "abgeschlossen" |
   });
 }
 
+function berechneLauf(
+  questions: SessionQuestion[],
+  gastFilterAktiv: boolean,
+  fortschrittFilter: FortschrittFilter,
+  resumeDaten: AktiveSession | null
+): Lauf | null {
+  // Fortsetzen: gespeicherte Reihenfolge + Position wiederherstellen.
+  if (resumeDaten && resumeDaten.frageIds.length > 0) {
+    const byId = new Map(questions.map((q) => [q.id, q]));
+    const geordnet = resumeDaten.frageIds
+      .map((id) => byId.get(id))
+      .filter((q): q is SessionQuestion => !!q);
+    if (geordnet.length === 0) {
+      return { fragen: questions, startIndex: 0, startErgebnisse: [] };
+    }
+    let fehlendVorIndex = 0;
+    for (let i = 0; i < Math.min(resumeDaten.index, resumeDaten.frageIds.length); i++) {
+      if (!byId.has(resumeDaten.frageIds[i])) fehlendVorIndex++;
+    }
+    const startIndex = Math.max(
+      0,
+      Math.min(resumeDaten.index - fehlendVorIndex, geordnet.length)
+    );
+    return { fragen: geordnet, startIndex, startErgebnisse: resumeDaten.ergebnisse ?? [] };
+  }
+
+  if (!gastFilterAktiv) {
+    return { fragen: questions, startIndex: 0, startErgebnisse: [] };
+  }
+
+  // Gast-Fortschrittsfilter wird im Effect aufgelöst (localStorage).
+  void fortschrittFilter;
+  return null;
+}
+
 export function QuestionRunner({
   questions,
   teil,
@@ -39,6 +81,9 @@ export function QuestionRunner({
   istAdmin,
   istGast,
   ungeleseneNachrichten,
+  favoritenIds,
+  resume,
+  resumeHref,
 }: {
   questions: SessionQuestion[];
   teil: Teil;
@@ -48,20 +93,40 @@ export function QuestionRunner({
   istAdmin: boolean;
   istGast: boolean;
   ungeleseneNachrichten: number;
+  favoritenIds: number[];
+  resume: boolean;
+  resumeHref: string;
 }) {
   const router = useRouter();
   const [sessionId] = useState(() => crypto.randomUUID());
-  const [index, setIndex] = useState(0);
-  const [ergebnisse, setErgebnisse] = useState<Ergebnis[]>([]);
 
-  // Gäste: der Fortschritts-Filter kann serverseitig nicht angewendet werden
-  // (results liegen im localStorage). Nachträglich hier filtern.
   const gastFilterAktiv = istGast && fortschrittFilter !== "alle";
-  const [gastBereit, setGastBereit] = useState(!gastFilterAktiv);
-  const [gefiltert, setGefiltert] = useState<SessionQuestion[]>(questions);
 
+  const [resumeDaten] = useState<AktiveSession | null>(() =>
+    resume ? getAktiveSession() : null
+  );
+  const [lauf, setLauf] = useState<Lauf | null>(() =>
+    berechneLauf(questions, gastFilterAktiv, fortschrittFilter, resumeDaten)
+  );
+  const [index, setIndex] = useState(() => lauf?.startIndex ?? 0);
+  const [ergebnisse, setErgebnisse] = useState<Ergebnis[]>(() => lauf?.startErgebnisse ?? []);
+
+  const sessionTitel = (() => {
+    if (modus === "ids") return "Favoriten";
+    if (modus === "modul") {
+      const m = (filterWerte.module as string[] | undefined) ?? [];
+      return m.length === 1 ? m[0] : m.length > 1 ? `${m.length} Module` : "Training";
+    }
+    if (modus === "kurs" || modus === "kurse") {
+      const ks = (filterWerte.kurse as { kurs: string }[] | undefined) ?? [];
+      return ks[0]?.kurs ?? (filterWerte.kurs as string) ?? "Kurs";
+    }
+    return "Zufällig";
+  })();
+
+  // Gast-Fortschrittsfilter nach dem Mounten anwenden (localStorage).
   useEffect(() => {
-    if (!gastFilterAktiv) return;
+    if (!gastFilterAktiv || resumeDaten) return;
     const bewertungen = getGastBewertungen();
     const neu = questions.filter((q) => {
       const b = bewertungen[q.id];
@@ -70,14 +135,13 @@ export function QuestionRunner({
       return b === "falsch" || b === "teilweise";
     });
     /* eslint-disable-next-line react-hooks/set-state-in-effect */
-    setGefiltert(neu);
-    setGastBereit(true);
-    // questions/fortschrittFilter sind über die Lebensdauer stabil (key-Remount).
+    setLauf({ fragen: neu, startIndex: 0, startErgebnisse: [] });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const aktiveFragen = gastFilterAktiv ? gefiltert : questions;
+  const aktiveFragen = lauf?.fragen ?? [];
 
+  // Session-Zeile für angemeldete Nutzer anlegen (Server-Historie).
   useEffect(() => {
     if (istGast || aktiveFragen.length === 0) return;
     fetch("/api/sessions", {
@@ -85,17 +149,36 @@ export function QuestionRunner({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: sessionId, modus, filterWerte }),
     });
-    // Nur beim Mounten anlegen — sessionId/modus/filterWerte ändern sich über
-    // die Lebensdauer dieser Komponenteninstanz nicht (key erzwingt Remount).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [lauf]);
+
+  // Snapshot für "Weitermachen" laufend aktualisieren.
+  useEffect(() => {
+    if (!lauf || lauf.fragen.length === 0) return;
+    if (index >= lauf.fragen.length) {
+      clearAktiveSession();
+      return;
+    }
+    if (index === 0 && ergebnisse.length === 0) return;
+    setAktiveSession({
+      href: resumeHref,
+      titel: sessionTitel,
+      frageIds: lauf.fragen.map((q) => q.id),
+      index,
+      ergebnisse,
+      gesamt: lauf.fragen.length,
+      aktualisiert: Date.now(),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, ergebnisse, lauf]);
 
   async function abbrechen() {
+    // Snapshot bleibt erhalten -> auf der Startseite kann fortgesetzt werden.
     if (!istGast) await sessionStatusAendern(sessionId, "abgebrochen");
     router.push("/");
   }
 
-  if (!gastBereit) {
+  if (!lauf) {
     return <div className="min-h-screen" aria-hidden />;
   }
 
@@ -123,6 +206,7 @@ export function QuestionRunner({
       sessionId={sessionId}
       istAdmin={istAdmin}
       istGast={istGast}
+      initialFavorit={favoritenIds.includes(aktiveFragen[index].id)}
       ungeleseneNachrichten={ungeleseneNachrichten}
       onAbbrechen={abbrechen}
       onNext={(result) => {
