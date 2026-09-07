@@ -10,17 +10,8 @@ import { StrukturierterText } from "@/components/strukturierter-text";
 import { ZoombaresBild } from "@/components/zoombares-bild";
 import { FrageMenu } from "@/components/frage-menu";
 import { FavoritButton, useFavorit } from "@/components/favorit-button";
+import { ErklaerAuswahl } from "@/components/erklaer-auswahl";
 import { setGastBewertung } from "@/lib/gast-fortschritt";
-
-/** Google-Suche im KI-Modus (AI Mode) mit Frage + kompletter Musterantwort
- *  als Kontext, damit die KI-Erklärung an die Musterantwort anknüpft. */
-function erklaerungsSuchUrl(q: SessionQuestion, musterantwort: string): string {
-  const begriff = `${q.kurs} – ${q.frage}\n\nMusterantwort:\n${musterantwort}\n\nBitte ausführlich erklären.`
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 1800);
-  return `https://www.google.com/search?udm=50&q=${encodeURIComponent(begriff)}`;
-}
 
 type MusterantwortResult = {
   musterantwort: string;
@@ -69,6 +60,7 @@ export function QuestionScreen({
   const [ausgewaehlteBewertung, setAusgewaehlteBewertung] = useState<Bewertung | null>(null);
   const [speichertBewertung, setSpeichertBewertung] = useState(false);
   const [mussWaehlen, setMussWaehlen] = useState(false);
+  const [erklaerOffen, setErklaerOffen] = useState(false);
   const bewertungRef = useRef<HTMLDivElement>(null);
   const { favorit, umschalten: favoritUmschalten } = useFavorit(
     question.id,
@@ -280,15 +272,16 @@ export function QuestionScreen({
                     alt="Bild zur Musterantwort"
                   />
                 )}
-                <a
-                  href={erklaerungsSuchUrl(question, musterantwortErgebnis.musterantwort)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setErklaerOffen(true);
+                  }}
                   className="inline-flex items-center gap-1.5 self-start rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-600 transition-colors hover:border-accent hover:text-accent"
                 >
                   🔍 Mehr Erklärung (Google KI-Modus)
-                </a>
+                </button>
               </>
             )}
             <span className="mt-auto pt-2 text-sm text-accent">← Zurück zur Frage</span>
@@ -390,6 +383,15 @@ export function QuestionScreen({
 
       {feedbackOffen && (
         <FeedbackForm questionId={question.id} onClose={() => setFeedbackOffen(false)} />
+      )}
+
+      {erklaerOffen && musterantwortErgebnis && (
+        <ErklaerAuswahl
+          kurs={question.kurs}
+          frage={question.frage}
+          musterantwort={musterantwortErgebnis.musterantwort}
+          onClose={() => setErklaerOffen(false)}
+        />
       )}
     </div>
   );
