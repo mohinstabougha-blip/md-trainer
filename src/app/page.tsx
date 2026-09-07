@@ -5,6 +5,7 @@ import { WartezeitBadge } from "@/components/wartezeit-bereich";
 import { FortschrittUebersicht } from "@/components/fortschritt-uebersicht";
 import { UpdateBanner } from "@/components/update-banner";
 import { WeitermachenKarte } from "@/components/weitermachen-karte";
+import { SucheBar } from "@/components/suche-bar";
 import { getAlleFragenMeta } from "@/lib/questions";
 import { getFavoritenIds } from "@/lib/favoriten-server";
 import { getUpdateInfo } from "@/lib/updates";
@@ -72,6 +73,8 @@ export default async function Home() {
           istGast={istGast}
         />
       </div>
+
+      <SucheBar />
 
       <WeitermachenKarte />
 

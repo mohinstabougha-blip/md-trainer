@@ -9,8 +9,14 @@ import { MusterantwortText } from "@/components/musterantwort-text";
 import { StrukturierterText } from "@/components/strukturierter-text";
 import { ZoombaresBild } from "@/components/zoombares-bild";
 import { FrageMenu } from "@/components/frage-menu";
-import { FavoritButton } from "@/components/favorit-button";
+import { FavoritButton, useFavorit } from "@/components/favorit-button";
 import { setGastBewertung } from "@/lib/gast-fortschritt";
+
+/** Google-Suche im KI-Modus (AI Mode) mit der Frage als Ausgangspunkt. */
+function erklaerungsSuchUrl(q: SessionQuestion): string {
+  const begriff = `${q.kurs} – ${q.frage}`.replace(/\s+/g, " ").trim().slice(0, 280);
+  return `https://www.google.com/search?udm=50&q=${encodeURIComponent(begriff)}`;
+}
 
 type MusterantwortResult = {
   musterantwort: string;
@@ -60,6 +66,11 @@ export function QuestionScreen({
   const [speichertBewertung, setSpeichertBewertung] = useState(false);
   const [mussWaehlen, setMussWaehlen] = useState(false);
   const bewertungRef = useRef<HTMLDivElement>(null);
+  const { favorit, umschalten: favoritUmschalten } = useFavorit(
+    question.id,
+    istGast,
+    initialFavorit
+  );
 
   const aufgedeckt = status === "musterantwort";
 
@@ -206,11 +217,7 @@ export function QuestionScreen({
               <span className="inline-block rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-accent">
                 Frage
               </span>
-              <FavoritButton
-                questionId={question.id}
-                istGast={istGast}
-                initialFavorit={initialFavorit}
-              />
+              <FavoritButton favorit={favorit} onToggle={favoritUmschalten} />
             </div>
             <StrukturierterText text={question.frage} className="text-lg" />
             {question.bild_frage_url && (
@@ -233,9 +240,12 @@ export function QuestionScreen({
             }}
             className="kp-card flex cursor-pointer flex-col gap-3 [backface-visibility:hidden] [grid-area:1/1] [transform:rotateY(180deg)]"
           >
-            <span className="inline-block self-start rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-violet-700">
-              Musterantwort
-            </span>
+            <div className="flex items-start justify-between gap-2">
+              <span className="inline-block rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-violet-700">
+                Musterantwort
+              </span>
+              <FavoritButton favorit={favorit} onToggle={favoritUmschalten} />
+            </div>
             {status === "laden" && (
               <p className="text-sm text-zinc-500">Musterantwort wird geladen…</p>
             )}
@@ -266,6 +276,15 @@ export function QuestionScreen({
                     alt="Bild zur Musterantwort"
                   />
                 )}
+                <a
+                  href={erklaerungsSuchUrl(question)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center gap-1.5 self-start rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-600 transition-colors hover:border-accent hover:text-accent"
+                >
+                  🔍 Mehr Erklärung (Google KI-Modus)
+                </a>
               </>
             )}
             <span className="mt-auto pt-2 text-sm text-accent">← Zurück zur Frage</span>
