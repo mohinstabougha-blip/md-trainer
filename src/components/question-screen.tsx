@@ -12,9 +12,13 @@ import { FrageMenu } from "@/components/frage-menu";
 import { FavoritButton, useFavorit } from "@/components/favorit-button";
 import { setGastBewertung } from "@/lib/gast-fortschritt";
 
-/** Google-Suche im KI-Modus (AI Mode) mit der Frage als Ausgangspunkt. */
-function erklaerungsSuchUrl(q: SessionQuestion): string {
-  const begriff = `${q.kurs} – ${q.frage}`.replace(/\s+/g, " ").trim().slice(0, 280);
+/** Google-Suche im KI-Modus (AI Mode) mit Frage + kompletter Musterantwort
+ *  als Kontext, damit die KI-Erklärung an die Musterantwort anknüpft. */
+function erklaerungsSuchUrl(q: SessionQuestion, musterantwort: string): string {
+  const begriff = `${q.kurs} – ${q.frage}\n\nMusterantwort:\n${musterantwort}\n\nBitte ausführlich erklären.`
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 1800);
   return `https://www.google.com/search?udm=50&q=${encodeURIComponent(begriff)}`;
 }
 
@@ -277,7 +281,7 @@ export function QuestionScreen({
                   />
                 )}
                 <a
-                  href={erklaerungsSuchUrl(question)}
+                  href={erklaerungsSuchUrl(question, musterantwortErgebnis.musterantwort)}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
