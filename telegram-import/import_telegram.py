@@ -36,6 +36,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import anthropic
+import httpx
 from dotenv import dotenv_values
 from supabase import create_client
 from telethon import TelegramClient
@@ -243,6 +244,27 @@ def lade_state() -> dict[str, int]:
 
 def speichere_state(state: dict[str, int]) -> None:
     STATE_PATH.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
+def revalidiere_updates_banner(konfig: dict[str, str]) -> None:
+    """Stößt nach neuen Fragen eine sofortige Cache-Auffrischung des "Laufend
+    erweitert"-Banners auf der Startseite an (sonst bis zu 1h Verzögerung,
+    siehe src/lib/updates.ts). SITE_URL + TELEGRAM_REVALIDATE_SECRET sind
+    optional (in .env eintragen, Secret muss mit der Vercel-Env-Variable
+    übereinstimmen) — ohne sie oder bei Netzwerkfehler passiert einfach
+    nichts, das darf den Import selbst nie zum Absturz bringen."""
+    site_url = konfig.get("SITE_URL")
+    secret = konfig.get("TELEGRAM_REVALIDATE_SECRET")
+    if not site_url or not secret:
+        return
+    try:
+        httpx.post(
+            f"{site_url.rstrip('/')}/api/telegram/revalidate",
+            headers={"x-revalidate-secret": secret},
+            timeout=10,
+        )
+    except Exception as fehler:
+        print(f"  (Hinweis: Update-Banner-Aktualisierung fehlgeschlagen: {fehler})")
 
 
 def klassifiziere(client: anthropic.Anthropic, text: str) -> dict | None:
@@ -511,6 +533,10 @@ async def hauptlauf(seit: datetime | None = None, automatisch_bestaetigt: bool =
             gesamt_wartezeit += wartezeit_erstellt
 
     await telegram_client.disconnect()
+
+    if gesamt_erstellt > 0:
+        revalidiere_updates_banner(konfig)
+
     print(
         f"\nFertig. Insgesamt {gesamt_erstellt} neue Frage(n) — direkt live, sichtbar in "
         f"/admin/fragen (Quelle: Telegram). {gesamt_wartezeit} Wartezeit-Meldung(en) erfasst."

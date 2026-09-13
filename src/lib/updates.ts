@@ -1,10 +1,11 @@
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-// „Laufend erweitert"-Banner: zeigt, wie viele freigegebene Nutzer-Einreichungen
-// zuletzt in die Fragendatenbank übernommen wurden – gesamt, pro Modul und mit
-// Datum der letzten Freigabe. Datenbasis sind questions-Zeilen mit
-// quelle = 'Nutzereinreichung' (so werden freigegebene Einreichungen angelegt).
+// „Laufend erweitert"-Banner: zeigt, wie viele Fragen zuletzt in die
+// Fragendatenbank aufgenommen wurden – gesamt, pro Modul und mit Datum der
+// letzten Aufnahme. Datenbasis sind questions-Zeilen mit
+// quelle = 'Nutzereinreichung' (freigegebene Einreichungen) ODER
+// quelle_typ = 'telegram' (automatischer Telegram-Import).
 
 const FENSTER_TAGE = 30;
 const MIN_FUERS_FENSTER = 5; // sonst auf „zuletzt N" ausweichen
@@ -27,7 +28,7 @@ async function ladeUpdateInfo(): Promise<UpdateInfo | null> {
     supabase
       .from("questions")
       .select("modul, erstellt_am")
-      .eq("quelle", "Nutzereinreichung")
+      .or("quelle.eq.Nutzereinreichung,quelle_typ.eq.telegram")
       .order("erstellt_am", { ascending: false }),
     supabase.from("questions").select("*", { count: "exact", head: true }),
   ]);
