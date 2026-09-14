@@ -68,11 +68,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 bg-zinc-50 p-6">
+    <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 bg-zinc-50 p-6 dark:bg-zinc-950">
       <div className="flex flex-col items-center text-center">
         <LogoMark size={44} />
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-accent">KP Baden</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
           {modus === "anmelden" ? "Melde dich an" : "Erstelle ein Konto"}
         </p>
       </div>
@@ -124,8 +124,8 @@ export default function LoginPage() {
 
         <TurnstileWidget onToken={setTurnstileToken} resetSignal={turnstileReset} />
 
-        {hinweis && <p className="text-sm text-green-700">{hinweis}</p>}
-        {fehler && <p className="text-sm text-red-600">{fehler}</p>}
+        {hinweis && <p className="text-sm text-green-700 dark:text-green-400">{hinweis}</p>}
+        {fehler && <p className="text-sm text-red-600 dark:text-red-400">{fehler}</p>}
 
         <button
           type="submit"
@@ -136,14 +136,14 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-center text-sm text-zinc-500">
-        <a href="/about" className="hover:text-zinc-900">
+      <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-center text-sm text-zinc-500 dark:text-zinc-400">
+        <a href="/about" className="hover:text-zinc-900 dark:hover:text-zinc-100">
           Was ist KP Baden?
         </a>
-        <a href="/datenschutz" className="hover:text-zinc-900">
+        <a href="/datenschutz" className="hover:text-zinc-900 dark:hover:text-zinc-100">
           Datenschutz
         </a>
-        <a href="/impressum" className="hover:text-zinc-900">
+        <a href="/impressum" className="hover:text-zinc-900 dark:hover:text-zinc-100">
           Impressum
         </a>
       </div>

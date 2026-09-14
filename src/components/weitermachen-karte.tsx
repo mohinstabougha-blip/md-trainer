@@ -32,20 +32,20 @@ export function WeitermachenKarte() {
       <div className="kp-card flex flex-col gap-3 border border-accent/20 bg-accent/5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold text-zinc-900">Angefangener Durchgang</p>
-            <p className="text-xs text-zinc-500">
+            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Angefangener Durchgang</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
               {session.titel} · Frage {beantwortet + 1} von {session.gesamt}
             </p>
           </div>
           <button
             type="button"
             onClick={verwerfen}
-            className="shrink-0 text-xs font-medium text-zinc-400 hover:text-red-600 hover:underline"
+            className="shrink-0 text-xs font-medium text-zinc-400 hover:text-red-600 hover:underline dark:text-zinc-500"
           >
             Verwerfen
           </button>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-200">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
           <div className="h-full rounded-full bg-accent" style={{ width: `${prozent}%` }} />
         </div>
         <Link href={session.href} className="kp-btn-primary py-3 text-center">

@@ -17,7 +17,7 @@ export function AbmeldenButton({ className }: { className?: string }) {
     <button
       type="button"
       onClick={abmelden}
-      className={className ?? "text-sm text-zinc-500 hover:text-zinc-900"}
+      className={className ?? "text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"}
     >
       Abmelden
     </button>

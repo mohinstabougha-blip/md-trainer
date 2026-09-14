@@ -63,7 +63,7 @@ export function ErklaerAuswahl({
       }}
     >
       <div
-        className="flex max-h-[85vh] w-full max-w-md flex-col rounded-2xl bg-white p-4 shadow-lg"
+        className="flex max-h-[85vh] w-full max-w-md flex-col rounded-2xl bg-white p-4 shadow-lg dark:bg-zinc-900"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-2 flex items-center justify-between">
@@ -72,7 +72,7 @@ export function ErklaerAuswahl({
             Schließen
           </button>
         </div>
-        <p className="mb-3 text-xs text-zinc-500">
+        <p className="mb-3 text-xs text-zinc-500 dark:text-zinc-400">
           Punkte antippen und gemeinsam öffnen – oder einen einzelnen Punkt direkt.
           Max. {MAX_WOERTER} Wörter pro Anfrage.
         </p>
@@ -82,7 +82,7 @@ export function ErklaerAuswahl({
             <div
               key={i}
               className={`flex items-start gap-2 rounded-xl border p-2 text-sm transition-colors ${
-                ausgewaehlt.has(i) ? "border-accent bg-accent/5" : "border-zinc-100"
+                ausgewaehlt.has(i) ? "border-accent bg-accent/5" : "border-zinc-100 dark:border-zinc-800"
               }`}
             >
               <input
@@ -101,7 +101,7 @@ export function ErklaerAuswahl({
               <button
                 type="button"
                 onClick={() => oeffnen(satz)}
-                className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-200"
+                className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
               >
                 Nur dies
               </button>
@@ -109,8 +109,10 @@ export function ErklaerAuswahl({
           ))}
         </div>
 
-        <div className="mt-3 flex items-center justify-between gap-2 border-t border-zinc-100 pt-3">
-          <span className={`text-xs ${zuViel ? "font-semibold text-red-600" : "text-zinc-400"}`}>
+        <div className="mt-3 flex items-center justify-between gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+          <span
+            className={`text-xs ${zuViel ? "font-semibold text-red-600 dark:text-red-400" : "text-zinc-400 dark:text-zinc-500"}`}
+          >
             {auswahlWoerter} / {MAX_WOERTER} Wörter
           </span>
           <button

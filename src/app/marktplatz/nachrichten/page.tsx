@@ -20,18 +20,18 @@ export default async function NachrichtenPage() {
     <div className="flex flex-col gap-4">
       <h1 className="text-xl font-semibold">Nachrichten</h1>
       {konversationen.length === 0 && (
-        <p className="text-sm text-zinc-500">Noch keine Nachrichten.</p>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">Noch keine Nachrichten.</p>
       )}
       <div className="flex flex-col gap-2">
         {konversationen.map((k) => (
           <Link
             key={`${k.angebotId}-${k.partnerId}`}
             href={`/marktplatz/nachrichten/${k.angebotId}/${k.partnerId}`}
-            className="kp-card flex items-center justify-between text-sm hover:bg-zinc-50"
+            className="kp-card flex items-center justify-between text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800"
           >
             <div>
               <p className="font-medium">{k.angebotTitel}</p>
-              <p className="text-zinc-500">
+              <p className="text-zinc-500 dark:text-zinc-400">
                 {k.letzteNachrichtVonMir ? "Du" : nutzerName(k.partnerId, namen, user!.id)}:{" "}
                 {k.letzteNachricht}
               </p>

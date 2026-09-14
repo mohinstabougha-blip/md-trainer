@@ -40,11 +40,11 @@ export function EinstellungenForm({ initialAnzeigename }: { initialAnzeigename: 
           className="kp-input"
         />
       </label>
-      <p className="text-xs text-zinc-500">
+      <p className="text-xs text-zinc-500 dark:text-zinc-400">
         Wird bei deinen Angeboten, Nachrichten und Kommentaren im Marktplatz angezeigt.
       </p>
-      {fehler && <p className="text-sm text-red-600">{fehler}</p>}
-      {gespeichert && <p className="text-sm text-green-700">Gespeichert.</p>}
+      {fehler && <p className="text-sm text-red-600 dark:text-red-400">{fehler}</p>}
+      {gespeichert && <p className="text-sm text-green-700 dark:text-green-400">Gespeichert.</p>}
       <button
         type="button"
         disabled={speichert || anzeigename.trim() === ""}

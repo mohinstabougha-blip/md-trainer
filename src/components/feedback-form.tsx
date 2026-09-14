@@ -40,11 +40,11 @@ export function FeedbackForm({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-lg">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-lg dark:bg-zinc-900">
         <h2 className="text-sm font-semibold">Problem melden</h2>
 
         {status === "gesendet" ? (
-          <p className="mt-3 text-sm text-zinc-600">Danke, dein Hinweis wurde gemeldet.</p>
+          <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">Danke, dein Hinweis wurde gemeldet.</p>
         ) : (
           <>
             <div className="mt-3 flex flex-col gap-1.5">
@@ -70,7 +70,7 @@ export function FeedbackForm({
               className="kp-input mt-3 w-full resize-none"
             />
             {status === "fehler" && (
-              <p className="mt-2 text-sm text-red-600">
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400">
                 Melden fehlgeschlagen. Bitte versuch es nochmal.
               </p>
             )}
@@ -79,7 +79,7 @@ export function FeedbackForm({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100"
+                className="rounded-full px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
               >
                 Abbrechen
               </button>

@@ -14,7 +14,7 @@ export default async function FavoritenPage() {
   const ungelesen = user ? await getUngeleseneNachrichtenAnzahl(user.id) : 0;
 
   return (
-    <div className="min-h-screen bg-zinc-50 pb-20 sm:pb-0">
+    <div className="min-h-screen bg-zinc-50 pb-20 sm:pb-0 dark:bg-zinc-950">
       <AppHeader
         email={user?.email ?? undefined}
         ungeleseneNachrichten={ungelesen}
@@ -22,7 +22,7 @@ export default async function FavoritenPage() {
       />
       <main className="mx-auto max-w-2xl px-6 pt-6">
         <h1 className="text-xl font-semibold">Favoriten</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
           Gemerkte Fragen – als Karteikarten neu lösen oder direkt mit Musterantwort ansehen.
         </p>
       </main>

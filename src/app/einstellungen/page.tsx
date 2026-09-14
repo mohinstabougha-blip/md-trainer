@@ -20,14 +20,14 @@ export default async function EinstellungenPage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-zinc-50 pb-20 sm:pb-0">
+    <div className="min-h-screen bg-zinc-50 pb-20 sm:pb-0 dark:bg-zinc-950">
       <AppHeader email={user!.email!} ungeleseneNachrichten={ungelesen} />
       <main className="mx-auto max-w-md p-6">
         <div className="flex flex-col gap-6">
           <h1 className="text-xl font-semibold">Einstellungen</h1>
           <EinstellungenForm initialAnzeigename={anzeigename ?? ""} />
           <div className="kp-card flex flex-col gap-2">
-            <h2 className="text-sm font-medium text-zinc-500">Mehr</h2>
+            <h2 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Mehr</h2>
             <Link href="/einreichen" className="text-sm text-accent hover:underline">
               Frage einreichen
             </Link>

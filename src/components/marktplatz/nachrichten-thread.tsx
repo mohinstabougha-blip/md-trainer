@@ -44,11 +44,13 @@ export function NachrichtenThread({
             <div key={n.id} className={`flex max-w-[75%] flex-col gap-1 ${vonMir ? "self-end items-end" : "self-start items-start"}`}>
               <div
                 className={`rounded-2xl px-3 py-2 text-sm ${
-                  vonMir ? "bg-accent text-white" : "bg-zinc-100"
+                  vonMir ? "bg-accent text-white" : "bg-zinc-100 dark:bg-zinc-800"
                 }`}
               >
                 {n.text}
-                <div className={`mt-1 text-xs ${vonMir ? "text-blue-100" : "text-zinc-500"}`}>
+                <div
+                  className={`mt-1 text-xs ${vonMir ? "text-blue-100" : "text-zinc-500 dark:text-zinc-400"}`}
+                >
                   {new Date(n.erstellt_am).toLocaleString("de-DE")}
                 </div>
               </div>

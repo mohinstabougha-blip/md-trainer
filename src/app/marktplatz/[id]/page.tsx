@@ -34,9 +34,9 @@ export default async function AngebotDetailPage({
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <span className="text-xs text-zinc-500">{KATEGORIE_LABEL[angebot.kategorie]}</span>
+          <span className="text-xs text-zinc-500 dark:text-zinc-400">{KATEGORIE_LABEL[angebot.kategorie]}</span>
           <h1 className="text-xl font-semibold">{angebot.titel}</h1>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
             von {nutzerName(angebot.user_id, namen, user!.id)}
             {angebot.preis && ` · ${angebot.preis}`}
             {angebot.status === "inaktiv" && " · inaktiv"}
@@ -51,7 +51,7 @@ export default async function AngebotDetailPage({
 
       {!istEigenes && <NachrichtSenden angebotId={angebot.id} anUserId={angebot.user_id} />}
 
-      <hr className="border-zinc-100" />
+      <hr className="border-zinc-100 dark:border-zinc-800" />
 
       <Kommentare
         angebotId={angebot.id}

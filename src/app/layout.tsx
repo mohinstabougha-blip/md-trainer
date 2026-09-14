@@ -49,12 +49,35 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// Setzt die .dark-Klasse VOR dem ersten Rendern (blockierendes Inline-Script,
+// kein next/script) – sonst blitzt bei Seitenaufruf kurz das helle Layout auf,
+// bevor React den gespeicherten Nachtmodus anwenden könnte.
+const THEME_INIT_SCRIPT = `
+(function () {
+  try {
+    var gespeichert = localStorage.getItem("kp_theme");
+    var dunkel = gespeichert
+      ? gespeichert === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.classList.toggle("dark", dunkel);
+  } catch (e) {}
+})();
+`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="de"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      // Das Inline-Script unten setzt .dark auf diesem Element schon vor der
+      // Hydration (siehe THEME_INIT_SCRIPT) – der dadurch entstehende, rein
+      // kosmetische className-Unterschied zwischen Server- und Client-Render
+      // ist beabsichtigt, React soll ihn nicht als Fehler melden/rückgängig machen.
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col">
         {children}
         <Analytics />

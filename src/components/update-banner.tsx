@@ -18,7 +18,7 @@ export function UpdateBanner({ info }: { info: UpdateInfo | null }) {
   const rest = proModul.length - topModule.length;
 
   return (
-    <div className="w-full border-b border-accent/20 bg-accent/[0.07] py-2 text-xs text-zinc-700 sm:text-[13px]">
+    <div className="w-full border-b border-accent/20 bg-accent/[0.07] py-2 text-xs text-zinc-700 sm:text-[13px] dark:text-zinc-300">
       <p className="mx-auto max-w-3xl px-4 text-center">
         <span className="mr-1 inline-flex items-center gap-1.5 font-semibold text-accent">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
@@ -36,13 +36,13 @@ export function UpdateBanner({ info }: { info: UpdateInfo | null }) {
           {topModule.map((m) => (
             <span
               key={m.modul}
-              className="whitespace-nowrap rounded-full bg-white/70 px-2 py-0.5 text-[11px] font-medium text-accent"
+              className="whitespace-nowrap rounded-full bg-white/70 px-2 py-0.5 text-[11px] font-medium text-accent dark:bg-zinc-900/60"
             >
               {m.modul} +{m.anzahl}
             </span>
           ))}
           {rest > 0 && (
-            <span className="whitespace-nowrap rounded-full bg-white/70 px-2 py-0.5 text-[11px] font-medium text-zinc-500">
+            <span className="whitespace-nowrap rounded-full bg-white/70 px-2 py-0.5 text-[11px] font-medium text-zinc-500 dark:bg-zinc-900/60 dark:text-zinc-400">
               +{rest} weitere
             </span>
           )}

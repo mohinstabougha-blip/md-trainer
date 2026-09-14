@@ -19,13 +19,13 @@ function Abschnitt({ titel, children }: { titel: string; children: React.ReactNo
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <header className="border-b border-zinc-100 bg-white px-6 py-3">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      <header className="border-b border-zinc-100 bg-white px-6 py-3 dark:border-zinc-800 dark:bg-zinc-950">
         <div className="mx-auto flex max-w-2xl items-center justify-between">
           <Link href="/">
             <Logo size={24} />
           </Link>
-          <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-900">
+          <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
             Zurück
           </Link>
         </div>
@@ -34,19 +34,19 @@ export default function AboutPage() {
       <main className="mx-auto flex max-w-2xl flex-col gap-8 p-6 pb-16">
         <div className="flex flex-col gap-3">
           <h1 className="text-2xl font-semibold">Über KP Baden</h1>
-          <p className="leading-relaxed text-zinc-700">
+          <p className="leading-relaxed text-zinc-700 dark:text-zinc-300">
             KP Baden ist ein kostenloses, werbefreies Übungswerkzeug für die{" "}
             <strong>Kenntnisprüfung (KP)</strong> im Rahmen der Approbation in Deutschland.
           </p>
         </div>
 
         <Abschnitt titel="Wer steckt dahinter?">
-          <p className="leading-relaxed text-zinc-700">
+          <p className="leading-relaxed text-zinc-700 dark:text-zinc-300">
             KP Baden wurde von einem approbierten Arzt entwickelt, der das gesamte
             Gleichwertigkeitsverfahren in Baden-Württemberg im Jahr 2025 erfolgreich
             abgeschlossen hat – von der Fachsprachprüfung bis zur Kenntnisprüfung.
           </p>
-          <p className="leading-relaxed text-zinc-700">
+          <p className="leading-relaxed text-zinc-700 dark:text-zinc-300">
             Die Vorbereitung lebt fast vollständig davon, dass Kolleginnen und Kollegen ihre
             Prüfungsprotokolle und Erfahrungen teilen. Dieses Projekt ist der Versuch, etwas
             davon zurückzugeben: gebündeltes Prüfungswissen, strukturiert und jederzeit
@@ -108,14 +108,14 @@ export default function AboutPage() {
             ].map(([t, d]) => (
               <li key={t} className="kp-card">
                 <p className="font-medium">{t}</p>
-                <p className="mt-1 text-sm leading-relaxed text-zinc-600">{d}</p>
+                <p className="mt-1 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{d}</p>
               </li>
             ))}
           </ul>
         </Abschnitt>
 
         <Abschnitt titel="So holst du am meisten heraus">
-          <ol className="flex list-decimal flex-col gap-2 pl-5 leading-relaxed text-zinc-700 marker:text-zinc-400">
+          <ol className="flex list-decimal flex-col gap-2 pl-5 leading-relaxed text-zinc-700 marker:text-zinc-400 dark:text-zinc-300">
             <li>
               <strong>Täglich kurze Runden</strong> statt seltener Marathons – Active Recall
               wirkt durch Wiederholung über die Zeit.
@@ -157,7 +157,7 @@ export default function AboutPage() {
         </Abschnitt>
 
         <Abschnitt titel="Wichtiger Hinweis">
-          <p className="text-sm leading-relaxed text-zinc-600">
+          <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
             KP Baden ist ein privates Lernprojekt und keine offizielle Stelle. Die Inhalte
             beruhen auf geteilten Protokollen und medizinischem Fachwissen, ersetzen aber
             weder Lehrbücher/Leitlinien noch die verbindlichen Angaben der zuständigen
@@ -171,11 +171,11 @@ export default function AboutPage() {
           </Link>
         </div>
 
-        <footer className="mt-4 flex flex-wrap gap-x-4 gap-y-1 border-t border-zinc-200 pt-4 text-sm text-zinc-500">
-          <Link href="/datenschutz" className="hover:text-zinc-900">
+        <footer className="mt-4 flex flex-wrap gap-x-4 gap-y-1 border-t border-zinc-200 pt-4 text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+          <Link href="/datenschutz" className="hover:text-zinc-900 dark:hover:text-zinc-100">
             Datenschutz
           </Link>
-          <Link href="/impressum" className="hover:text-zinc-900">
+          <Link href="/impressum" className="hover:text-zinc-900 dark:hover:text-zinc-100">
             Impressum
           </Link>
         </footer>

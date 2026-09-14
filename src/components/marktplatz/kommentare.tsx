@@ -42,17 +42,17 @@ export function Kommentare({
 
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="text-sm font-medium text-zinc-500">
+      <h2 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
         Kommentare {kommentare.length > 0 && `(${kommentare.length})`}
       </h2>
 
       <div className="flex flex-col gap-2">
         {kommentare.map((k) => (
-          <div key={k.id} className="rounded-xl bg-zinc-50 p-3 text-sm">
+          <div key={k.id} className="rounded-xl bg-zinc-50 p-3 text-sm dark:bg-zinc-800">
             <div className="flex items-baseline justify-between gap-2">
               <span className="font-medium">{nutzerName(k.user_id, namen, aktuelleUserId)}</span>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-zinc-400 dark:text-zinc-500">
                   {new Date(k.erstellt_am).toLocaleString("de-DE")}
                 </span>
                 {k.user_id !== aktuelleUserId && (
@@ -60,11 +60,11 @@ export function Kommentare({
                 )}
               </div>
             </div>
-            <p className="mt-1 text-zinc-700">{k.text}</p>
+            <p className="mt-1 text-zinc-700 dark:text-zinc-300">{k.text}</p>
           </div>
         ))}
         {kommentare.length === 0 && (
-          <p className="text-sm text-zinc-500">Noch keine Kommentare.</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">Noch keine Kommentare.</p>
         )}
       </div>
 

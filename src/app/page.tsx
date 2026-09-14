@@ -50,7 +50,7 @@ export default async function Home() {
   ]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 pb-20 sm:pb-0">
+    <div className="flex min-h-screen flex-col bg-zinc-50 pb-20 sm:pb-0 dark:bg-zinc-950">
       <UpdateBanner info={updateInfo} />
       <AppHeader
         email={user?.email ?? undefined}
@@ -62,7 +62,7 @@ export default async function Home() {
         <Link
           href="/einreichen"
           aria-label="Frage oder Protokoll einreichen"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl font-medium leading-none text-accent shadow-sm"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl font-medium leading-none text-accent shadow-sm dark:bg-zinc-900"
         >
           +
         </Link>

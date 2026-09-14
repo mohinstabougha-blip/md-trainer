@@ -70,8 +70,8 @@ export function FavoritButton({
       aria-label={favorit ? "Aus Favoriten entfernen" : "Zu Favoriten hinzufügen"}
       className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors ${
         favorit
-          ? "border-amber-300 bg-amber-50 text-amber-700"
-          : "border-zinc-200 bg-white text-zinc-500 hover:border-amber-300 hover:text-amber-600"
+          ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
+          : "border-zinc-200 bg-white text-zinc-500 hover:border-amber-300 hover:text-amber-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-amber-700"
       } ${className}`}
     >
       <span className="text-sm leading-none">{favorit ? "★" : "☆"}</span>

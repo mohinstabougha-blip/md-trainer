@@ -1,13 +1,36 @@
 @import "tailwindcss";
 
+/* Nachtmodus per Klasse (statt nur prefers-color-scheme) steuerbar, siehe
+   components/theme-toggle.tsx – dort wird .dark am <html> gesetzt/entfernt. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #fafafa;
   --foreground: #262626;
   --accent: #3797f0;
   --accent-hover: #1877c9;
-  /* Verhindert, dass Browser (z.B. bei OS-Dunkelmodus) Formularfelder
-     automatisch nachdunkeln, obwohl die Seite ein festes helles Design hat. */
   color-scheme: light;
+  /* Für den handgezeichneten Wartezeit-SVG-Graphen (wartezeit-graph.tsx):
+     SVG-Attribute lesen keine Tailwind dark:-Varianten, deshalb hier als
+     CSS-Variablen mit eigenem Dunkelmodus-Wert. */
+  --wz-dunkel: #3f3f46;
+  --wz-grau: #71717a;
+  --wz-hellgrau: #a1a1aa;
+  --wz-gitter: #e4e4e7;
+  --wz-achse: #d4d4d8;
+}
+
+.dark {
+  --background: #0a0a0b;
+  --foreground: #e4e4e7;
+  --accent: #4da3f5;
+  --accent-hover: #7cc0fa;
+  color-scheme: dark;
+  --wz-dunkel: #e4e4e7;
+  --wz-grau: #a1a1aa;
+  --wz-hellgrau: #71717a;
+  --wz-gitter: #3f3f46;
+  --wz-achse: #52525b;
 }
 
 @theme inline {
@@ -27,17 +50,16 @@ body {
 
 @layer components {
   .kp-card {
-    @apply rounded-2xl bg-white p-4 shadow-sm;
+    @apply rounded-2xl bg-white p-4 shadow-sm dark:bg-zinc-900 dark:shadow-none;
   }
   .kp-input {
-    @apply rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 focus:border-accent focus:outline-none;
-    color-scheme: light;
+    @apply rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 focus:border-accent focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50;
   }
   .kp-btn-primary {
     @apply rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40;
   }
   .kp-btn-secondary {
-    @apply rounded-full border border-zinc-200 px-5 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 disabled:cursor-not-allowed disabled:opacity-40;
+    @apply rounded-full border border-zinc-200 px-5 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500;
   }
   .kp-pill {
     @apply rounded-full border px-3 py-2 text-sm font-medium transition-colors;
@@ -46,7 +68,7 @@ body {
     @apply border-accent bg-accent text-white;
   }
   .kp-pill-inaktiv {
-    @apply border-zinc-200 text-zinc-600 hover:border-zinc-300;
+    @apply border-zinc-200 text-zinc-600 hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-500;
   }
 }
 

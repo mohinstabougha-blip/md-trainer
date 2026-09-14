@@ -10,7 +10,7 @@ export function FortschrittRing({ stat }: { stat: ModulFortschritt }) {
     { anzahl: stat.richtig, farbe: "#16a34a" },
     { anzahl: stat.teilweise, farbe: "#d97706" },
     { anzahl: stat.falsch, farbe: "#dc2626" },
-    { anzahl: stat.gesamt - stat.bearbeitet, farbe: "#d4d4d8" },
+    { anzahl: stat.gesamt - stat.bearbeitet, farbe: "unbearbeitet" },
   ];
 
   let offset = 0;
@@ -24,7 +24,7 @@ export function FortschrittRing({ stat }: { stat: ModulFortschritt }) {
             cy={GROESSE / 2}
             r={RADIUS}
             fill="none"
-            stroke="#d4d4d8"
+            className="stroke-zinc-300 dark:stroke-zinc-700"
             strokeWidth={STRICHBREITE}
           />
         ) : (
@@ -39,7 +39,8 @@ export function FortschrittRing({ stat }: { stat: ModulFortschritt }) {
                 cy={GROESSE / 2}
                 r={RADIUS}
                 fill="none"
-                stroke={seg.farbe}
+                stroke={seg.farbe === "unbearbeitet" ? undefined : seg.farbe}
+                className={seg.farbe === "unbearbeitet" ? "stroke-zinc-300 dark:stroke-zinc-700" : undefined}
                 strokeWidth={STRICHBREITE}
                 strokeDasharray={dasharray}
                 strokeDashoffset={-offset}
@@ -55,7 +56,7 @@ export function FortschrittRing({ stat }: { stat: ModulFortschritt }) {
         y="50%"
         textAnchor="middle"
         dominantBaseline="middle"
-        className="fill-zinc-800 text-[11px] font-medium"
+        className="fill-zinc-800 text-[11px] font-medium dark:fill-zinc-100"
       >
         {stat.bearbeitet}/{stat.gesamt}
       </text>

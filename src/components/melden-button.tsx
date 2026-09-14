@@ -51,7 +51,7 @@ export function MeldenButton({
   }
 
   if (fertig) {
-    return <span className="text-xs text-zinc-500">Gemeldet — wird geprüft.</span>;
+    return <span className="text-xs text-zinc-500 dark:text-zinc-400">Gemeldet — wird geprüft.</span>;
   }
 
   if (!offen) {
@@ -59,7 +59,11 @@ export function MeldenButton({
       <button
         type="button"
         onClick={() => setOffen(true)}
-        className={klein ? "text-xs text-zinc-400 hover:underline" : "text-sm text-zinc-500 hover:underline"}
+        className={
+          klein
+            ? "text-xs text-zinc-400 hover:underline dark:text-zinc-500"
+            : "text-sm text-zinc-500 hover:underline dark:text-zinc-400"
+        }
       >
         🚩 Melden
       </button>
@@ -67,7 +71,7 @@ export function MeldenButton({
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-xl bg-zinc-50 p-3 text-sm">
+    <div className="flex flex-col gap-2 rounded-xl bg-zinc-50 p-3 text-sm dark:bg-zinc-800">
       <select
         value={grund}
         onChange={(e) => setGrund(e.target.value)}
@@ -97,7 +101,7 @@ export function MeldenButton({
         <button
           type="button"
           onClick={() => setOffen(false)}
-          className="rounded-full px-3 py-1 text-xs text-zinc-600 hover:bg-zinc-100"
+          className="rounded-full px-3 py-1 text-xs text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-700"
         >
           Abbrechen
         </button>

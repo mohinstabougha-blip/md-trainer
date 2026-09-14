@@ -89,7 +89,7 @@ export default async function SessionPage({
   const istAdmin = isValidAdminToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value);
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       {/* key erzwingt einen vollständigen Remount bei neuer Session-Konfiguration
           (z.B. "Nochmal üben"), sonst bliebe der interne State von QuestionRunner
           über die Navigation hinweg bestehen. */}

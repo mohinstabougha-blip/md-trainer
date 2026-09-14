@@ -74,20 +74,20 @@ export function WartezeitBadge({
         type="button"
         onClick={() => setDetailOffen(true)}
         aria-label="Wartezeit-Details"
-        className="flex h-10 items-center gap-1 rounded-full bg-white px-3 text-xs font-semibold text-zinc-700 shadow-sm"
+        className="flex h-10 items-center gap-1 rounded-full bg-white px-3 text-xs font-semibold text-zinc-700 shadow-sm dark:bg-zinc-900 dark:text-zinc-300"
       >
         ⏱ {badgeText}
       </button>
 
       {detailOffen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-5 text-left shadow-lg">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 text-left shadow-lg dark:bg-zinc-900">
             <div className="flex items-start justify-between gap-2">
               <h2 className="text-sm font-semibold">Ø Wartezeit</h2>
               <button
                 type="button"
                 onClick={() => setDetailOffen(false)}
-                className="text-sm text-zinc-500"
+                className="text-sm text-zinc-500 dark:text-zinc-400"
               >
                 Schließen
               </button>
@@ -108,10 +108,10 @@ export function WartezeitBadge({
 
       {formularOffen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-5 text-left shadow-lg">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 text-left shadow-lg dark:bg-zinc-900">
             <h2 className="text-sm font-semibold">Meine Wartezeit-Daten</h2>
             {istGast && (
-              <p className="mt-1 text-xs text-zinc-500">
+              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
                 Wird anonym gemeldet und fließt in den Community-Schnitt ein. Als Gast
                 kannst du deine Meldung später nicht mehr ändern.
               </p>
@@ -171,7 +171,7 @@ export function WartezeitBadge({
               )}
             </div>
 
-            {fehler && <p className="mt-2 text-sm text-red-600">{fehler}</p>}
+            {fehler && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{fehler}</p>}
 
             <div className="mt-3">{widget}</div>
 
@@ -179,7 +179,7 @@ export function WartezeitBadge({
               <button
                 type="button"
                 onClick={() => setFormularOffen(false)}
-                className="rounded-full px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100"
+                className="rounded-full px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
               >
                 Abbrechen
               </button>

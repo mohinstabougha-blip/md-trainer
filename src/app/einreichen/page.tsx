@@ -19,7 +19,7 @@ export default async function EinreichenPage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-zinc-50 pb-20 sm:pb-0">
+    <div className="min-h-screen bg-zinc-50 pb-20 sm:pb-0 dark:bg-zinc-950">
       <AppHeader
         email={user?.email ?? undefined}
         ungeleseneNachrichten={ungelesen}
@@ -29,7 +29,7 @@ export default async function EinreichenPage() {
         <div className="flex flex-col gap-6">
           <div>
             <h1 className="text-xl font-semibold">Frage oder Protokoll einreichen</h1>
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
               Deine Einreichung landet nicht direkt in der Fragendatenbank, sondern wird erst nach
               Prüfung freigegeben.
               {!user && " Du kannst auch als Gast einreichen."}

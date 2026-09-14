@@ -10,7 +10,7 @@ export default async function MarktplatzLayout({ children }: { children: React.R
   const ungelesen = user ? await getUngeleseneNachrichtenAnzahl(user.id) : 0;
 
   return (
-    <div className="min-h-screen bg-zinc-50 pb-20 sm:pb-0">
+    <div className="min-h-screen bg-zinc-50 pb-20 sm:pb-0 dark:bg-zinc-950">
       <AppHeader
         email={user?.email ?? undefined}
         ungeleseneNachrichten={ungelesen}

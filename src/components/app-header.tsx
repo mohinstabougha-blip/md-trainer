@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AbmeldenButton } from "@/components/abmelden-button";
 import { Logo, LogoMark } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function IconHome({ aktiv }: { aktiv: boolean }) {
   return (
@@ -91,7 +92,7 @@ export function AppHeader({
   function desktopLinkKlasse(aktiv: boolean) {
     return aktiv
       ? "font-semibold text-accent"
-      : "text-zinc-500 hover:text-zinc-900";
+      : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100";
   }
 
   const nachrichtenAktiv = pathname.startsWith("/marktplatz/nachrichten");
@@ -102,7 +103,7 @@ export function AppHeader({
   return (
     <>
       {/* Desktop: klare Top-Leiste mit Textlinks */}
-      <header className="hidden border-b border-zinc-100 bg-white px-6 py-3 text-sm sm:flex sm:items-center sm:justify-between sm:gap-3">
+      <header className="hidden border-b border-zinc-100 bg-white px-6 py-3 text-sm sm:flex sm:items-center sm:justify-between sm:gap-3 dark:border-zinc-800 dark:bg-zinc-950">
         <nav className="flex items-center gap-5">
           <Link href="/" className="mr-1">
             <Logo size={24} />
@@ -128,57 +129,63 @@ export function AppHeader({
             Über
           </Link>
         </nav>
-        {istGast ? (
-          <Link
-            href="/login"
-            className="rounded-full bg-accent px-4 py-1.5 font-medium text-white hover:opacity-90"
-          >
-            Anmelden / Registrieren
-          </Link>
-        ) : (
-          <div className="flex items-center gap-3 text-zinc-500">
-            {email && <span>{email}</span>}
-            <Link href="/einstellungen" className={desktopLinkKlasse(profilAktiv)}>
-              Einstellungen
+        <div className="flex items-center gap-3">
+          {istGast ? (
+            <Link
+              href="/login"
+              className="rounded-full bg-accent px-4 py-1.5 font-medium text-white hover:opacity-90"
+            >
+              Anmelden / Registrieren
             </Link>
-            <AbmeldenButton className="hover:text-zinc-900" />
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
+              {email && <span>{email}</span>}
+              <Link href="/einstellungen" className={desktopLinkKlasse(profilAktiv)}>
+                Einstellungen
+              </Link>
+              <AbmeldenButton className="hover:text-zinc-900 dark:hover:text-zinc-100" />
+            </div>
+          )}
+          <ThemeToggle />
+        </div>
       </header>
 
       {/* Mobile: schlanke Kopfzeile + Bottom-Navigation mit den Hauptpunkten. */}
-      <header className="flex items-center justify-between border-b border-zinc-100 bg-white px-5 py-3 sm:hidden">
+      <header className="flex items-center justify-between border-b border-zinc-100 bg-white px-5 py-3 sm:hidden dark:border-zinc-800 dark:bg-zinc-950">
         <span className="flex items-center gap-2">
           <LogoMark size={22} />
           <span className="text-base font-semibold tracking-tight text-accent">KP Baden</span>
         </span>
-        {istGast ? (
-          <Link
-            href="/login"
-            className="rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-white"
-          >
-            Anmelden
-          </Link>
-        ) : (
-          <Link
-            href="/einstellungen"
-            aria-label="Profil/Einstellungen"
-            className={`flex h-8 w-8 items-center justify-center rounded-full ${
-              profilAktiv ? "bg-accent/10 text-accent" : "text-zinc-500"
-            }`}
-          >
-            <IconUser aktiv={profilAktiv} />
-          </Link>
-        )}
+        <div className="flex items-center gap-1.5">
+          <ThemeToggle />
+          {istGast ? (
+            <Link
+              href="/login"
+              className="rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-white"
+            >
+              Anmelden
+            </Link>
+          ) : (
+            <Link
+              href="/einstellungen"
+              aria-label="Profil/Einstellungen"
+              className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                profilAktiv ? "bg-accent/10 text-accent" : "text-zinc-500 dark:text-zinc-400"
+              }`}
+            >
+              <IconUser aktiv={profilAktiv} />
+            </Link>
+          )}
+        </div>
       </header>
       <nav
         aria-label="Hauptnavigation"
-        className="fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around border-t border-zinc-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around border-t border-zinc-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden dark:border-zinc-800 dark:bg-zinc-950/95"
       >
         <Link
           href="/"
           className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] ${
-            homeAktiv ? "text-accent" : "text-zinc-500"
+            homeAktiv ? "text-accent" : "text-zinc-500 dark:text-zinc-400"
           }`}
         >
           <IconHome aktiv={homeAktiv} />
@@ -188,7 +195,7 @@ export function AppHeader({
           <Link
             href="/einreichen"
             className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] ${
-              pathname === "/einreichen" ? "text-accent" : "text-zinc-500"
+              pathname === "/einreichen" ? "text-accent" : "text-zinc-500 dark:text-zinc-400"
             }`}
           >
             <IconInbox aktiv={pathname === "/einreichen"} />
@@ -198,7 +205,7 @@ export function AppHeader({
           <Link
             href="/marktplatz/nachrichten"
             className={`relative flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] ${
-              nachrichtenAktiv ? "text-accent" : "text-zinc-500"
+              nachrichtenAktiv ? "text-accent" : "text-zinc-500 dark:text-zinc-400"
             }`}
           >
             <IconInbox aktiv={nachrichtenAktiv} />
@@ -213,7 +220,7 @@ export function AppHeader({
         <Link
           href="/marktplatz"
           className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] ${
-            marktplatzAktiv ? "text-accent" : "text-zinc-500"
+            marktplatzAktiv ? "text-accent" : "text-zinc-500 dark:text-zinc-400"
           }`}
         >
           <IconBag aktiv={marktplatzAktiv} />

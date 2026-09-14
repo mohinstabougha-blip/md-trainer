@@ -2,9 +2,13 @@ import type { WartezeitBeispiel, WartezeitVerlauf } from "@/lib/wartezeit";
 
 const ROT = "#dc2626";
 const GRUEN = "#16a34a";
-const DUNKEL = "#3f3f46";
-const GRAU = "#71717a";
-const HELLGRAU = "#a1a1aa";
+// Über CSS-Variablen (globals.css) statt fixer Hex-Werte, damit der Graph im
+// Nachtmodus mitwechselt – SVG-Attribute lesen keine Tailwind dark:-Klassen.
+const DUNKEL = "var(--wz-dunkel)";
+const GRAU = "var(--wz-grau)";
+const HELLGRAU = "var(--wz-hellgrau)";
+const GITTER = "var(--wz-gitter)";
+const ACHSE = "var(--wz-achse)";
 const TAGE_PRO_MONAT = 30.44;
 
 // Zeichenfläche (viewBox-Einheiten ≈ px, da das SVG ~in Breite des Dialogs rendert)
@@ -114,7 +118,7 @@ export function WartezeitGraph({
 
   if (zeilen.length === 0) {
     return (
-      <div className="mt-3 rounded-xl bg-zinc-50 px-3 py-6 text-center text-xs text-zinc-500">
+      <div className="mt-3 rounded-xl bg-zinc-50 px-3 py-6 text-center text-xs text-zinc-500 dark:bg-zinc-950 dark:text-zinc-400">
         <p>Noch keine Daten für den Wartezeit-Verlauf.</p>
         <p className="mt-1">{meldungenText(verlauf.meldungenImZeitraum)}</p>
       </div>
@@ -155,7 +159,7 @@ export function WartezeitGraph({
           const beschriften = (k + 1) % rasterSchritt === 0;
           return (
             <g key={`grid-${k}`}>
-              <line x1={x} y1={TOP} x2={x} y2={gridUnten - 2} stroke="#e4e4e7" strokeWidth="1" />
+              <line x1={x} y1={TOP} x2={x} y2={gridUnten - 2} stroke={GITTER} strokeWidth="1" />
               {beschriften && (
                 <text x={x} y={H - 3} textAnchor="middle" fontSize={FS_RASTER} fill={HELLGRAU}>
                   {k + 1}
@@ -164,7 +168,7 @@ export function WartezeitGraph({
             </g>
           );
         })}
-        <line x1={PLOT_L} y1={TOP} x2={PLOT_L} y2={gridUnten - 2} stroke="#d4d4d8" strokeWidth="1" />
+        <line x1={PLOT_L} y1={TOP} x2={PLOT_L} y2={gridUnten - 2} stroke={ACHSE} strokeWidth="1" />
         <text x={4} y={H - 3} fontSize={FS_RASTER} fill={HELLGRAU}>
           Monate ab Antrag
         </text>
@@ -193,7 +197,7 @@ export function WartezeitGraph({
                   y1={basisY + 1}
                   x2={PLOT_R}
                   y2={basisY + 1}
-                  stroke="#d4d4d8"
+                  stroke={ACHSE}
                   strokeWidth="1"
                   strokeDasharray="2 2"
                 />
@@ -277,7 +281,7 @@ export function WartezeitGraph({
           );
         })}
       </svg>
-      <div className="mt-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-zinc-600">
+      <div className="mt-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-zinc-600 dark:text-zinc-400">
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: DUNKEL }} />
           Antragsdatum
@@ -291,7 +295,7 @@ export function WartezeitGraph({
           Prüfungstermin
         </span>
       </div>
-      <p className="mt-1 text-center text-xs text-zinc-500">
+      <p className="mt-1 text-center text-xs text-zinc-500 dark:text-zinc-400">
         {meldungenText(verlauf.meldungenImZeitraum)}
       </p>
     </>

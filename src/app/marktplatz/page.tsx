@@ -29,18 +29,18 @@ export default async function MarktplatzPage() {
             Anmelden
           </Link>
         </div>
-        <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
+        <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
           Als Gast siehst du nur die Titel. Zum Öffnen, Kontaktieren, Kommentieren
           oder für ein eigenes Angebot bitte anmelden.
         </p>
         <div className="flex flex-col gap-2">
           {titel.length === 0 && (
-            <p className="text-sm text-zinc-500">Noch keine Angebote.</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">Noch keine Angebote.</p>
           )}
           {titel.map((a) => (
             <div key={a.id} className="kp-card flex flex-col gap-0.5">
               <span className="font-medium">{a.titel}</span>
-              <span className="text-xs text-zinc-500">{KATEGORIE_LABEL[a.kategorie]}</span>
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">{KATEGORIE_LABEL[a.kategorie]}</span>
             </div>
           ))}
         </div>

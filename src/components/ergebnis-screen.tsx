@@ -51,7 +51,7 @@ export function ErgebnisScreen({ stats, teil }: { stats: KursStat[]; teil: Teil 
     <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col gap-6 p-6">
       <div className="text-center">
         <h1 className="text-2xl font-semibold">Session beendet</h1>
-        <p className="mt-1 text-zinc-500">
+        <p className="mt-1 text-zinc-500 dark:text-zinc-400">
           {gesamtRichtig} richtig · {gesamtTeilweise} teilweise · {gesamtFalsch} falsch von{" "}
           {gesamt} Fragen
         </p>
@@ -59,7 +59,7 @@ export function ErgebnisScreen({ stats, teil }: { stats: KursStat[]; teil: Teil 
 
       {gut.length > 0 && (
         <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium text-green-700">Das lief gut</h2>
+          <h2 className="text-sm font-medium text-green-700 dark:text-green-400">Das lief gut</h2>
           <ul className="kp-card flex flex-col gap-1 text-sm">
             {gut.map((s, i) => (
               <li key={i}>
@@ -73,7 +73,7 @@ export function ErgebnisScreen({ stats, teil }: { stats: KursStat[]; teil: Teil 
 
       {ueben.length > 0 && (
         <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium text-amber-700">Das solltest du üben</h2>
+          <h2 className="text-sm font-medium text-amber-700 dark:text-amber-400">Das solltest du üben</h2>
           <ul className="kp-card flex flex-col gap-1 text-sm">
             {ueben.map((s, i) => (
               <li key={i}>

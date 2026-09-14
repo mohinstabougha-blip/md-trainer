@@ -79,7 +79,7 @@ export function FortschrittUebersicht({
         type="button"
         onClick={() => scrollen("links")}
         aria-label="Nach links scrollen"
-        className="absolute left-1 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white p-1.5 text-zinc-600 shadow-md sm:flex"
+        className="absolute left-1 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white p-1.5 text-zinc-600 shadow-md sm:flex dark:bg-zinc-800 dark:text-zinc-300"
       >
         <ChevronIcon richtung="links" />
       </button>
@@ -96,7 +96,7 @@ export function FortschrittUebersicht({
             className="flex w-20 flex-shrink-0 flex-col items-center gap-1 text-center"
           >
             <FortschrittRing stat={stat} />
-            <span className="line-clamp-2 w-full break-words text-[11px] leading-tight text-zinc-600">
+            <span className="line-clamp-2 w-full break-words text-[11px] leading-tight text-zinc-600 dark:text-zinc-400">
               {stat.modul}
             </span>
           </Link>
@@ -107,7 +107,7 @@ export function FortschrittUebersicht({
         type="button"
         onClick={() => scrollen("rechts")}
         aria-label="Nach rechts scrollen"
-        className="absolute right-1 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white p-1.5 text-zinc-600 shadow-md sm:flex"
+        className="absolute right-1 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white p-1.5 text-zinc-600 shadow-md sm:flex dark:bg-zinc-800 dark:text-zinc-300"
       >
         <ChevronIcon richtung="rechts" />
       </button>

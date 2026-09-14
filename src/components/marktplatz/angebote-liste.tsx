@@ -77,7 +77,7 @@ export function AngeboteListe({
             </option>
           ))}
         </select>
-        <label className="flex items-center gap-2 text-sm text-zinc-600">
+        <label className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
           <input
             type="checkbox"
             checked={nurMeine}
@@ -90,7 +90,7 @@ export function AngeboteListe({
 
       <div className="flex flex-col gap-3">
         {gefiltert.length === 0 && (
-          <p className="text-sm text-zinc-500">Keine Angebote gefunden.</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">Keine Angebote gefunden.</p>
         )}
         {gefiltert.map((a) => (
           <div key={a.id} className="kp-card flex flex-col gap-1">
@@ -99,13 +99,13 @@ export function AngeboteListe({
                 {a.titel}
               </Link>
               {a.status === "inaktiv" && (
-                <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-xs text-zinc-600">
+                <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
                   inaktiv
                 </span>
               )}
             </div>
-            <p className="line-clamp-2 text-sm text-zinc-600">{a.beschreibung}</p>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500">
+            <p className="line-clamp-2 text-sm text-zinc-600 dark:text-zinc-400">{a.beschreibung}</p>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400">
               <span>{KATEGORIE_LABEL[a.kategorie]}</span>
               {a.preis && <span>{a.preis}</span>}
               <span>{nutzerName(a.user_id, namen, aktuelleUserId)}</span>
@@ -116,7 +116,7 @@ export function AngeboteListe({
                   type="button"
                   disabled={aendertId === a.id}
                   onClick={() => statusAendern(a.id, a.status === "aktiv" ? "inaktiv" : "aktiv")}
-                  className="text-zinc-600 hover:underline disabled:opacity-40"
+                  className="text-zinc-600 hover:underline disabled:opacity-40 dark:text-zinc-400"
                 >
                   {a.status === "aktiv" ? "Deaktivieren" : "Aktivieren"}
                 </button>
@@ -124,7 +124,7 @@ export function AngeboteListe({
                   type="button"
                   disabled={aendertId === a.id}
                   onClick={() => loeschen(a.id)}
-                  className="text-red-600 hover:underline disabled:opacity-40"
+                  className="text-red-600 hover:underline disabled:opacity-40 dark:text-red-400"
                 >
                   Löschen
                 </button>

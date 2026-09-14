@@ -88,13 +88,17 @@ export function FavoritenListe({ istGast }: { istGast: boolean }) {
   }
 
   if (status === "laden") {
-    return <p className="mx-auto max-w-2xl px-6 py-10 text-sm text-zinc-500">Favoriten werden geladen…</p>;
+    return (
+      <p className="mx-auto max-w-2xl px-6 py-10 text-sm text-zinc-500 dark:text-zinc-400">
+        Favoriten werden geladen…
+      </p>
+    );
   }
 
   if (status === "fehler") {
     return (
       <div className="mx-auto flex max-w-2xl flex-col items-start gap-3 px-6 py-10">
-        <p className="text-sm text-red-700">Das hat nicht geklappt.</p>
+        <p className="text-sm text-red-700 dark:text-red-400">Das hat nicht geklappt.</p>
         <button type="button" onClick={() => void laden()} className="kp-btn-primary px-4 py-2 text-sm">
           Erneut versuchen
         </button>
@@ -105,7 +109,7 @@ export function FavoritenListe({ istGast }: { istGast: boolean }) {
   if (fragen.length === 0) {
     return (
       <div className="mx-auto flex max-w-2xl flex-col items-start gap-3 px-6 py-10">
-        <p className="text-sm text-zinc-600">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">
           Noch keine Favoriten. Tippe während einer Übung auf den Stern ☆, um eine Frage zu merken.
         </p>
         <Link href="/" className="text-sm text-accent hover:underline">
@@ -120,7 +124,7 @@ export function FavoritenListe({ istGast }: { istGast: boolean }) {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
           {fragen.length} Favorit{fragen.length === 1 ? "" : "en"}
         </p>
         <Link
@@ -136,13 +140,13 @@ export function FavoritenListe({ istGast }: { istGast: boolean }) {
         return (
           <div key={f.id} className="kp-card flex flex-col gap-3">
             <div className="flex items-start justify-between gap-3">
-              <span className="text-xs text-zinc-500">
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">
                 {f.modul} · {f.kurs} · Teil {f.teil}
               </span>
               <button
                 type="button"
                 onClick={() => entfernen(f.id)}
-                className="shrink-0 text-xs font-medium text-zinc-400 hover:text-red-600 hover:underline"
+                className="shrink-0 text-xs font-medium text-zinc-400 hover:text-red-600 hover:underline dark:text-zinc-500"
               >
                 Favorit entfernen
               </button>
@@ -160,8 +164,8 @@ export function FavoritenListe({ istGast }: { istGast: boolean }) {
             </button>
 
             {istOffen && (
-              <div className="flex flex-col gap-3 rounded-xl bg-violet-50/50 p-3">
-                <span className="inline-block self-start rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-violet-700">
+              <div className="flex flex-col gap-3 rounded-xl bg-violet-50/50 p-3 dark:bg-violet-950/40">
+                <span className="inline-block self-start rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
                   Musterantwort
                 </span>
                 <MusterantwortText text={f.musterantwort} className="text-sm leading-relaxed" />
@@ -169,7 +173,7 @@ export function FavoritenListe({ istGast }: { istGast: boolean }) {
                   <ZoombaresBild src={f.bild_antwort_url} alt="Bild zur Musterantwort" />
                 )}
                 {f.hilfe_hinweis && (
-                  <p className="rounded-lg bg-amber-50 p-2 text-sm text-amber-900">
+                  <p className="rounded-lg bg-amber-50 p-2 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
                     💡 {f.hilfe_hinweis}
                   </p>
                 )}

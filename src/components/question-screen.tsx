@@ -19,9 +19,24 @@ type MusterantwortResult = {
 };
 
 const BEWERTUNG_OPTIONEN: { wert: Bewertung; label: string; icon: string; className: string }[] = [
-  { wert: "richtig", label: "Richtig", icon: "✓", className: "bg-green-100 text-green-800 hover:bg-green-200" },
-  { wert: "teilweise", label: "Teilweise", icon: "±", className: "bg-amber-100 text-amber-800 hover:bg-amber-200" },
-  { wert: "falsch", label: "Falsch", icon: "✕", className: "bg-red-100 text-red-800 hover:bg-red-200" },
+  {
+    wert: "richtig",
+    label: "Richtig",
+    icon: "✓",
+    className: "bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/40 dark:text-green-300 dark:hover:bg-green-900/60",
+  },
+  {
+    wert: "teilweise",
+    label: "Teilweise",
+    icon: "±",
+    className: "bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:hover:bg-amber-900/60",
+  },
+  {
+    wert: "falsch",
+    label: "Falsch",
+    icon: "✕",
+    className: "bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900/40 dark:text-red-300 dark:hover:bg-red-900/60",
+  },
 ];
 
 export function QuestionScreen({
@@ -228,7 +243,7 @@ export function QuestionScreen({
               aria-label="Abbrechen"
               title="Abbrechen"
               onClick={abbrechenKlick}
-              className="text-xl leading-none text-red-600"
+              className="text-xl leading-none text-red-600 dark:text-red-400"
             >
               ✕
             </button>
@@ -237,18 +252,18 @@ export function QuestionScreen({
 
         <div>
           <div className="flex items-baseline justify-between gap-3">
-            <h2 className="text-xl font-bold tracking-tight text-zinc-800">
+            <h2 className="text-xl font-bold tracking-tight text-zinc-800 dark:text-zinc-100">
               Frage <span className="text-accent">{index + 1}</span>
-              <span className="font-medium text-zinc-400"> / {gesamt}</span>
+              <span className="font-medium text-zinc-400 dark:text-zinc-500"> / {gesamt}</span>
             </h2>
             <span
-              className="truncate text-xs text-zinc-500"
+              className="truncate text-xs text-zinc-500 dark:text-zinc-400"
               title={`${question.modul} · ${question.kurs} · Teil ${question.teil}`}
             >
               {question.modul} · {question.kurs} · Teil {question.teil}
             </span>
           </div>
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
             <div
               role="progressbar"
               aria-valuemin={1}
@@ -322,16 +337,16 @@ export function QuestionScreen({
             className="kp-card flex cursor-pointer flex-col gap-3 [backface-visibility:hidden] [grid-area:1/1] [transform:rotateY(180deg)]"
           >
             <div className="flex items-start justify-between gap-2">
-              <span className="inline-block rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-violet-700">
+              <span className="inline-block rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
                 Musterantwort
               </span>
               <FavoritButton favorit={favorit} onToggle={favoritUmschalten} />
             </div>
             {status === "laden" && (
-              <p className="text-sm text-zinc-500">Musterantwort wird geladen…</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">Musterantwort wird geladen…</p>
             )}
             {status === "fehler" && (
-              <div className="flex flex-col items-start gap-2 text-sm text-red-700">
+              <div className="flex flex-col items-start gap-2 text-sm text-red-700 dark:text-red-400">
                 <span>Das hat nicht geklappt. Bitte versuch es nochmal.</span>
                 <button
                   type="button"
@@ -363,7 +378,7 @@ export function QuestionScreen({
                     e.stopPropagation();
                     setErklaerOffen(true);
                   }}
-                  className="inline-flex items-center gap-1.5 self-start rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-600 transition-colors hover:border-accent hover:text-accent"
+                  className="inline-flex items-center gap-1.5 self-start rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-600 transition-colors hover:border-accent hover:text-accent dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400"
                 >
                   🔍 Mehr Erklärung (Google KI-Modus)
                 </button>
@@ -382,12 +397,12 @@ export function QuestionScreen({
           <button
             type="button"
             onClick={() => setHilfeOffen((v) => !v)}
-            className="text-sm text-amber-700 hover:underline"
+            className="text-sm text-amber-700 hover:underline dark:text-amber-400"
           >
             💡 Hilfe
           </button>
           {hilfeOffen && (
-            <p className="mt-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
+            <p className="mt-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
               {question.hilfe_hinweis}
             </p>
           )}
@@ -395,7 +410,7 @@ export function QuestionScreen({
       )}
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm text-zinc-500">Deine Antwort / Notizen (optional)</label>
+        <label className="text-sm text-zinc-500 dark:text-zinc-400">Deine Antwort / Notizen (optional)</label>
         <textarea
           value={antwort}
           onChange={(e) => setAntwort(e.target.value)}
@@ -424,11 +439,11 @@ export function QuestionScreen({
               mussWaehlen && !ausgewaehlteBewertung ? "ring-2 ring-amber-400" : ""
             }`}
           >
-            <h3 className="text-sm font-medium text-zinc-500">
+            <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
               Wie hast du im Vergleich zur Musterantwort abgeschnitten?
             </h3>
             {mussWaehlen && !ausgewaehlteBewertung && (
-              <p className="text-sm font-medium text-amber-700">
+              <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
                 Bitte wähle eine Einschätzung, um zur nächsten Frage zu gehen.
               </p>
             )}
@@ -445,7 +460,7 @@ export function QuestionScreen({
                   className={`rounded-full px-3 py-2 text-sm font-semibold transition-colors disabled:opacity-40 ${
                     ausgewaehlteBewertung === opt.wert
                       ? `${opt.className} ring-2 ring-offset-1 ring-current`
-                      : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                      : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
                   }`}
                 >
                   <span aria-hidden>{opt.icon}</span> {opt.label}
@@ -456,7 +471,7 @@ export function QuestionScreen({
 
           <AntwortKommentare questionId={question.id} istGast={istGast} />
 
-          <div className="sticky bottom-0 -mx-6 mt-1 border-t border-zinc-100 bg-zinc-50/95 px-6 pb-3 pt-3 backdrop-blur">
+          <div className="sticky bottom-0 -mx-6 mt-1 border-t border-zinc-100 bg-zinc-50/95 px-6 pb-3 pt-3 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
             <button
               type="button"
               disabled={speichertBewertung}
@@ -465,7 +480,7 @@ export function QuestionScreen({
             >
               {speichertBewertung ? "…" : "Nächste Frage →"}
             </button>
-            <p className="mt-1.5 text-center text-xs text-zinc-400">
+            <p className="mt-1.5 text-center text-xs text-zinc-400 dark:text-zinc-500">
               oder auf der Karte nach links wischen, um ohne Bewertung weiterzugehen
             </p>
           </div>

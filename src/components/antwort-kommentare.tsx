@@ -63,17 +63,17 @@ export function AntwortKommentare({
 
   return (
     <div className="kp-card flex flex-col gap-3">
-      <h3 className="text-sm font-medium text-zinc-500">
+      <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
         Kommentare zur Musterantwort {kommentare.length > 0 && `(${kommentare.length})`}
       </h3>
 
       <div className="flex flex-col gap-2">
         {kommentare.map((k) => (
-          <div key={k.id} className="rounded-xl bg-zinc-50 p-3 text-sm">
+          <div key={k.id} className="rounded-xl bg-zinc-50 p-3 text-sm dark:bg-zinc-800">
             <div className="flex items-baseline justify-between gap-2">
               <span className="font-medium">{k.anzeigename}</span>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-zinc-400 dark:text-zinc-500">
                   {new Date(k.erstelltAm).toLocaleString("de-DE")}
                 </span>
                 {!istGast && k.userId !== aktuelleUserId && (
@@ -86,11 +86,11 @@ export function AntwortKommentare({
                 )}
               </div>
             </div>
-            <p className="mt-1 text-zinc-700">{k.text}</p>
+            <p className="mt-1 text-zinc-700 dark:text-zinc-300">{k.text}</p>
           </div>
         ))}
         {kommentare.length === 0 && (
-          <p className="text-sm text-zinc-500">Noch keine Kommentare.</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">Noch keine Kommentare.</p>
         )}
       </div>
 
@@ -113,7 +113,7 @@ export function AntwortKommentare({
         </div>
         {text.trim() !== "" && widget}
         {istGast && (
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-zinc-400 dark:text-zinc-500">
             Du kommentierst als Gast. Melde dich an, um unter deinem Namen zu schreiben.
           </p>
         )}

@@ -61,7 +61,7 @@ export function NachrichtSenden({ angebotId, anUserId }: { angebotId: number; an
         <button
           type="button"
           onClick={() => setOffen(false)}
-          className="rounded-full px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100"
+          className="rounded-full px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
         >
           Abbrechen
         </button>

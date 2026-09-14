@@ -40,7 +40,7 @@ export function AngebotForm() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-zinc-500">Kategorie</label>
+        <label className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Kategorie</label>
         <select
           value={kategorie}
           onChange={(e) => setKategorie(e.target.value as AngebotKategorie)}
@@ -55,12 +55,12 @@ export function AngebotForm() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-zinc-500">Titel</label>
+        <label className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Titel</label>
         <input value={titel} onChange={(e) => setTitel(e.target.value)} className="kp-input" />
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-zinc-500">Beschreibung</label>
+        <label className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Beschreibung</label>
         <textarea
           value={beschreibung}
           onChange={(e) => setBeschreibung(e.target.value)}
@@ -70,7 +70,7 @@ export function AngebotForm() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-zinc-500">
+        <label className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
           Preis (nur Anzeige, optional)
         </label>
         <input

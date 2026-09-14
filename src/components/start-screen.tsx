@@ -199,8 +199,8 @@ function AuswahlZeile({
       onClick={onClick}
       className="kp-card flex w-full items-center justify-between text-sm"
     >
-      <span className="text-zinc-500">{label}</span>
-      <span className="flex items-center gap-1 font-medium text-zinc-900">
+      <span className="text-zinc-500 dark:text-zinc-400">{label}</span>
+      <span className="flex items-center gap-1 font-medium text-zinc-900 dark:text-zinc-50">
         {wert}
         <ChevronRight />
       </span>
@@ -224,12 +224,14 @@ function OptionZeile({
       type="button"
       onClick={onClick}
       className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm transition-colors ${
-        aktiv ? "bg-accent/10 font-medium text-accent" : "hover:bg-zinc-50"
+        aktiv ? "bg-accent/10 font-medium text-accent" : "hover:bg-zinc-50 dark:hover:bg-zinc-800"
       }`}
     >
       <span className="flex-1 text-left">{label}</span>
       {anzahl !== undefined && (
-        <span className={`text-xs tabular-nums ${aktiv ? "text-accent" : "text-zinc-400"}`}>
+        <span
+          className={`text-xs tabular-nums ${aktiv ? "text-accent" : "text-zinc-400 dark:text-zinc-500"}`}
+        >
           {anzahl}
         </span>
       )}
@@ -253,7 +255,7 @@ function PickerOverlay({
       onClick={onClose}
     >
       <div
-        className="flex max-h-[85vh] w-full max-w-sm flex-col rounded-2xl bg-white p-4 shadow-lg"
+        className="flex max-h-[85vh] w-full max-w-sm flex-col rounded-2xl bg-white p-4 shadow-lg dark:bg-zinc-900"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-2 flex items-center justify-between">
@@ -429,9 +431,11 @@ export function StartScreen({
         onClick={() => setOffenerPicker("fortschritt")}
       />
       <label className="kp-card flex w-full cursor-pointer items-center justify-between text-sm">
-        <span className="text-zinc-500">
+        <span className="text-zinc-500 dark:text-zinc-400">
           🔀 Fragen mischen
-          {teil === "voll" && <span className="text-zinc-400"> (auch über Teile hinweg)</span>}
+          {teil === "voll" && (
+            <span className="text-zinc-400 dark:text-zinc-500"> (auch über Teile hinweg)</span>
+          )}
         </span>
         <input
           type="checkbox"
@@ -456,7 +460,7 @@ export function StartScreen({
         <div className="kp-card mt-1 flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <span className="text-amber-500">★</span>
-            <span className="text-sm font-medium text-zinc-900">
+            <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
               {favoriten.length} Favorit{favoriten.length === 1 ? "" : "en"}
             </span>
           </div>
@@ -469,7 +473,7 @@ export function StartScreen({
             </Link>
             <Link
               href="/favoriten"
-              className="flex-1 rounded-full bg-zinc-100 px-3 py-2 text-center text-sm font-semibold text-zinc-700 hover:bg-zinc-200"
+              className="flex-1 rounded-full bg-zinc-100 px-3 py-2 text-center text-sm font-semibold text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
             >
               Mit Antworten ansehen
             </Link>
@@ -495,11 +499,11 @@ export function StartScreen({
               onClick={() => setModus("modul")}
             />
             {modus === "modul" && (
-              <div className="ml-2 flex max-h-48 flex-col gap-1 overflow-y-auto rounded-xl bg-zinc-50 p-2">
+              <div className="ml-2 flex max-h-48 flex-col gap-1 overflow-y-auto rounded-xl bg-zinc-50 p-2 dark:bg-zinc-950">
                 {alleModule.map((modul) => (
                   <label
                     key={modul}
-                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-zinc-100"
+                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
                   >
                     <input
                       type="checkbox"
@@ -508,7 +512,7 @@ export function StartScreen({
                       className="h-4 w-4 accent-[#3797f0]"
                     />
                     <span className="flex-1">{modul}</span>
-                    <span className="text-xs tabular-nums text-zinc-400">
+                    <span className="text-xs tabular-nums text-zinc-400 dark:text-zinc-500">
                       {zaehle({ modus: "modul", ausgewaehlteModule: [modul] })}
                     </span>
                   </label>
@@ -521,10 +525,10 @@ export function StartScreen({
               onClick={() => setModus("kurs")}
             />
             {modus === "kurs" && (
-              <div className="ml-2 flex max-h-56 flex-col gap-2 overflow-y-auto rounded-xl bg-zinc-50 p-2">
+              <div className="ml-2 flex max-h-56 flex-col gap-2 overflow-y-auto rounded-xl bg-zinc-50 p-2 dark:bg-zinc-950">
                 {[...moduleNachName.entries()].map(([modul, fragen]) => (
                   <div key={modul} className="flex flex-col gap-0.5">
-                    <span className="px-2 pt-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    <span className="px-2 pt-1 text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
                       {modul}
                     </span>
                     {[...new Set(fragen.map((f) => kursBasis(f.kurs)))]
@@ -534,7 +538,7 @@ export function StartScreen({
                         return (
                           <label
                             key={schluessel}
-                            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-zinc-100"
+                            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
                           >
                             <input
                               type="checkbox"
@@ -543,7 +547,7 @@ export function StartScreen({
                               className="h-4 w-4 accent-[#3797f0]"
                             />
                             <span className="flex-1">{basis}</span>
-                            <span className="text-xs tabular-nums text-zinc-400">
+                            <span className="text-xs tabular-nums text-zinc-400 dark:text-zinc-500">
                               {zaehle({ modus: "kurs", ausgewaehlteKurse: [schluessel] })}
                             </span>
                           </label>

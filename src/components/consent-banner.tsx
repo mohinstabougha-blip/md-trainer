@@ -22,9 +22,9 @@ export function ConsentBanner() {
     <div
       role="dialog"
       aria-label="Cookie-Hinweis"
-      className="fixed bottom-20 left-3 right-3 z-50 rounded-2xl border border-zinc-200 bg-white p-4 text-sm shadow-lg sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-sm"
+      className="fixed bottom-20 left-3 right-3 z-50 rounded-2xl border border-zinc-200 bg-white p-4 text-sm shadow-lg sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-sm dark:border-zinc-700 dark:bg-zinc-900"
     >
-      <p className="text-zinc-700">
+      <p className="text-zinc-700 dark:text-zinc-300">
         Wir verwenden optionale Cookies für Reichweitenmessung und Werbung (Meta Pixel) –
         nur mit deiner Einwilligung. Für das Training ist keine Zustimmung nötig. Details in
         der{" "}
@@ -44,7 +44,7 @@ export function ConsentBanner() {
         <button
           type="button"
           onClick={() => setConsent("denied")}
-          className="flex-1 rounded-full border border-zinc-300 py-2 font-medium text-zinc-600 hover:bg-zinc-50"
+          className="flex-1 rounded-full border border-zinc-300 py-2 font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
         >
           Ablehnen
         </button>
