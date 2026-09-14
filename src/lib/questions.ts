@@ -61,7 +61,11 @@ export async function getSessionQuestions(
   teil: Teil,
   sortierung: Sortierung = "zufaellig",
   fortschrittFilter: FortschrittFilter = "alle",
-  userId?: string
+  userId?: string,
+  /** Bei Vollsimulation (teil="voll") normalerweise Teil 1 -> 2 -> 3
+   *  nacheinander; mit mischen=true wird auch das übersprungen und alle
+   *  Teile komplett durcheinander gegeben. */
+  mischen = false
 ): Promise<SessionQuestion[]> {
   const supabase = await createClient();
   let query = supabase
@@ -148,8 +152,9 @@ export async function getSessionQuestions(
     }
 
     // Vollsimulation: Teil 1, dann 2, dann 3 nacheinander (stabil, behält die
-    // oben gewählte Sortierung innerhalb jedes Teils bei).
-    if (teil === "voll") {
+    // oben gewählte Sortierung innerhalb jedes Teils bei) — außer der Nutzer
+    // möchte die Teile per "Mischen"-Option bewusst durcheinander.
+    if (teil === "voll" && !mischen) {
       sortiert.sort((a, b) => a.teil - b.teil);
     }
   }

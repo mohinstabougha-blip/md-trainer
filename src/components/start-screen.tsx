@@ -38,7 +38,7 @@ const FORTSCHRITT_OPTIONEN: { value: FortschrittFilter; label: string }[] = [
 type Kriterien = {
   modus: Modus;
   ausgewaehlteModule: string[];
-  ausgewaehlterKurs: string;
+  ausgewaehlteKurse: string[];
   teil: Teil;
   fortschrittFilter: FortschrittFilter;
 };
@@ -155,9 +155,8 @@ function frageErfuelltKriterien(
 ): boolean {
   if (k.modus === "modul") {
     if (k.ausgewaehlteModule.length > 0 && !k.ausgewaehlteModule.includes(f.modul)) return false;
-  } else if (k.modus === "kurs" && k.ausgewaehlterKurs) {
-    const [modul, basis] = k.ausgewaehlterKurs.split("|||");
-    if (f.modul !== modul || kursBasis(f.kurs) !== basis) return false;
+  } else if (k.modus === "kurs" && k.ausgewaehlteKurse.length > 0) {
+    if (!k.ausgewaehlteKurse.includes(`${f.modul}|||${kursBasis(f.kurs)}`)) return false;
   }
   if (k.teil !== "voll" && String(f.teil) !== k.teil) return false;
   if (k.fortschrittFilter !== "alle") {
@@ -295,10 +294,11 @@ export function StartScreen({
 
   const [modus, setModus] = useState<Modus>("zufaellig");
   const [ausgewaehlteModule, setAusgewaehlteModule] = useState<string[]>([]);
-  const [ausgewaehlterKurs, setAusgewaehlterKurs] = useState<string>("");
+  const [ausgewaehlteKurse, setAusgewaehlteKurse] = useState<string[]>([]);
   const [teil, setTeil] = useState<Teil>("voll");
   const [sortierung, setSortierung] = useState<Sortierung>("haeufigste");
   const [fortschrittFilter, setFortschrittFilter] = useState<FortschrittFilter>("alle");
+  const [mischen, setMischen] = useState(false);
   const [offenerPicker, setOffenerPicker] = useState<PickerName>(null);
 
   const alleModule = useMemo(
@@ -322,16 +322,24 @@ export function StartScreen({
     );
   }
 
+  function toggleKurs(kursSchluessel: string) {
+    setAusgewaehlteKurse((prev) =>
+      prev.includes(kursSchluessel)
+        ? prev.filter((k) => k !== kursSchluessel)
+        : [...prev, kursSchluessel]
+    );
+  }
+
   const kannStarten =
     modus === "zufaellig" ||
     (modus === "modul" && ausgewaehlteModule.length > 0) ||
-    (modus === "kurs" && ausgewaehlterKurs !== "");
+    (modus === "kurs" && ausgewaehlteKurse.length > 0);
 
   const zaehle = (over: Partial<Kriterien> = {}) => {
     const k: Kriterien = {
       modus,
       ausgewaehlteModule,
-      ausgewaehlterKurs,
+      ausgewaehlteKurse,
       teil,
       fortschrittFilter,
       ...over,
@@ -345,14 +353,14 @@ export function StartScreen({
 
   const verfuegbareAnzahl = useMemo(
     () => {
-      const k: Kriterien = { modus, ausgewaehlteModule, ausgewaehlterKurs, teil, fortschrittFilter };
+      const k: Kriterien = { modus, ausgewaehlteModule, ausgewaehlteKurse, teil, fortschrittFilter };
       let n = 0;
       for (const f of fragenMeta) {
         if (frageErfuelltKriterien(f, k, bewertungen)) n++;
       }
       return n;
     },
-    [fragenMeta, modus, ausgewaehlteModule, ausgewaehlterKurs, teil, fortschrittFilter, bewertungen]
+    [fragenMeta, modus, ausgewaehlteModule, ausgewaehlteKurse, teil, fortschrittFilter, bewertungen]
   );
 
   function starten() {
@@ -363,13 +371,13 @@ export function StartScreen({
       params.set("modus", "modul");
       params.set("module", ausgewaehlteModule.join(","));
     } else if (modus === "kurs") {
-      // Ein kompaktierter Kurs kann mehreren gespeicherten Kursnamen entsprechen
-      // -> als Liste (modus "kurse") übergeben.
-      const [modul, basis] = ausgewaehlterKurs.split("|||");
+      // Jeder kompaktierte Kurs kann mehreren gespeicherten Kursnamen
+      // entsprechen -> alle ausgewählten zusammen als Liste (modus "kurse").
+      const zielSet = new Set(ausgewaehlteKurse);
       const paare = [
         ...new Map(
           fragenMeta
-            .filter((f) => f.modul === modul && kursBasis(f.kurs) === basis)
+            .filter((f) => zielSet.has(`${f.modul}|||${kursBasis(f.kurs)}`))
             .map((f) => [`${f.modul}|||${f.kurs}`, { modul: f.modul, kurs: f.kurs }])
         ).values(),
       ];
@@ -380,6 +388,9 @@ export function StartScreen({
     }
     if (fortschrittFilter !== "alle") {
       params.set("fortschritt", fortschrittFilter);
+    }
+    if (mischen) {
+      params.set("mischen", "1");
     }
     router.push(`/session?${params.toString()}`);
   }
@@ -393,9 +404,11 @@ export function StartScreen({
           : ausgewaehlteModule.length === 1
             ? ausgewaehlteModule[0]
             : `${ausgewaehlteModule.length} Module`
-        : ausgewaehlterKurs
-          ? ausgewaehlterKurs.split("|||")[1]
-          : "Auswählen…";
+        : ausgewaehlteKurse.length === 0
+          ? "Auswählen…"
+          : ausgewaehlteKurse.length === 1
+            ? ausgewaehlteKurse[0].split("|||")[1]
+            : `${ausgewaehlteKurse.length} Kurse`;
 
   const teilLabel = TEIL_OPTIONEN.find((o) => o.value === teil)?.label ?? "Alle";
   const sortierungLabel = SORTIER_OPTIONEN.find((o) => o.value === sortierung)?.label ?? "";
@@ -415,6 +428,18 @@ export function StartScreen({
         wert={fortschrittLabel}
         onClick={() => setOffenerPicker("fortschritt")}
       />
+      <label className="kp-card flex w-full cursor-pointer items-center justify-between text-sm">
+        <span className="text-zinc-500">
+          🔀 Fragen mischen
+          {teil === "voll" && <span className="text-zinc-400"> (auch über Teile hinweg)</span>}
+        </span>
+        <input
+          type="checkbox"
+          checked={mischen}
+          onChange={(e) => setMischen(e.target.checked)}
+          className="h-4 w-4 accent-[#3797f0]"
+        />
+      </label>
 
       <button
         type="button"
@@ -496,24 +521,37 @@ export function StartScreen({
               onClick={() => setModus("kurs")}
             />
             {modus === "kurs" && (
-              <select
-                value={ausgewaehlterKurs}
-                onChange={(e) => setAusgewaehlterKurs(e.target.value)}
-                className="kp-input ml-2"
-              >
-                <option value="">Kurs auswählen…</option>
+              <div className="ml-2 flex max-h-56 flex-col gap-2 overflow-y-auto rounded-xl bg-zinc-50 p-2">
                 {[...moduleNachName.entries()].map(([modul, fragen]) => (
-                  <optgroup key={modul} label={modul}>
+                  <div key={modul} className="flex flex-col gap-0.5">
+                    <span className="px-2 pt-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                      {modul}
+                    </span>
                     {[...new Set(fragen.map((f) => kursBasis(f.kurs)))]
                       .sort((a, b) => a.localeCompare(b, "de"))
-                      .map((basis) => (
-                        <option key={`${modul}|||${basis}`} value={`${modul}|||${basis}`}>
-                          {basis} ({zaehle({ modus: "kurs", ausgewaehlterKurs: `${modul}|||${basis}` })})
-                        </option>
-                      ))}
-                  </optgroup>
+                      .map((basis) => {
+                        const schluessel = `${modul}|||${basis}`;
+                        return (
+                          <label
+                            key={schluessel}
+                            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-zinc-100"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={ausgewaehlteKurse.includes(schluessel)}
+                              onChange={() => toggleKurs(schluessel)}
+                              className="h-4 w-4 accent-[#3797f0]"
+                            />
+                            <span className="flex-1">{basis}</span>
+                            <span className="text-xs tabular-nums text-zinc-400">
+                              {zaehle({ modus: "kurs", ausgewaehlteKurse: [schluessel] })}
+                            </span>
+                          </label>
+                        );
+                      })}
+                  </div>
                 ))}
-              </select>
+              </div>
             )}
           </div>
         </PickerOverlay>

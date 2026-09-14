@@ -72,6 +72,7 @@ export default async function SessionPage({
     params.fortschritt ? String(params.fortschritt) : "alle"
   ) as FortschrittFilter;
   const resume = params.resume === "1";
+  const mischen = params.mischen === "1";
 
   const supabase = await createClient();
   const {
@@ -79,7 +80,7 @@ export default async function SessionPage({
   } = await supabase.auth.getUser();
 
   const [questions, ungeleseneNachrichten, favoritenIds, cookieStore] = await Promise.all([
-    getSessionQuestions(filter, teil, sortierung, fortschrittFilter, user?.id),
+    getSessionQuestions(filter, teil, sortierung, fortschrittFilter, user?.id, mischen),
     user ? getUngeleseneNachrichtenAnzahl(user.id) : Promise.resolve(0),
     user ? getFavoritenIds(user.id) : Promise.resolve([]),
     cookies(),

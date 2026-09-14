@@ -18,10 +18,10 @@ type MusterantwortResult = {
   bildAntwortUrl: string | null;
 };
 
-const BEWERTUNG_OPTIONEN: { wert: Bewertung; label: string; className: string }[] = [
-  { wert: "richtig", label: "Richtig", className: "bg-green-100 text-green-800 hover:bg-green-200" },
-  { wert: "teilweise", label: "Teilweise", className: "bg-amber-100 text-amber-800 hover:bg-amber-200" },
-  { wert: "falsch", label: "Falsch", className: "bg-red-100 text-red-800 hover:bg-red-200" },
+const BEWERTUNG_OPTIONEN: { wert: Bewertung; label: string; icon: string; className: string }[] = [
+  { wert: "richtig", label: "Richtig", icon: "✓", className: "bg-green-100 text-green-800 hover:bg-green-200" },
+  { wert: "teilweise", label: "Teilweise", icon: "±", className: "bg-amber-100 text-amber-800 hover:bg-amber-200" },
+  { wert: "falsch", label: "Falsch", icon: "✕", className: "bg-red-100 text-red-800 hover:bg-red-200" },
 ];
 
 export function QuestionScreen({
@@ -67,6 +67,14 @@ export function QuestionScreen({
     istGast,
     initialFavorit
   );
+
+  // Wisch-Navigation: nach links wischen springt zur nächsten Frage, auch ohne
+  // Selbsteinschätzung (die bleibt der "Nächste Frage"-Taste vorbehalten).
+  const [dragX, setDragX] = useState(0);
+  const [ziehend, setZiehend] = useState(false);
+  const zugStartRef = useRef<{ x: number; y: number } | null>(null);
+  const wurdeGewischtRef = useRef(false);
+  const navigiertRef = useRef(false);
 
   const aufgedeckt = status === "musterantwort";
 
@@ -135,6 +143,68 @@ export function QuestionScreen({
     }
   }
 
+  // Freies Weiter (Wischen): mit gewählter Bewertung wie die Taste "Nächste
+  // Frage" speichern, sonst einfach überspringen – keine Pflicht zur
+  // Selbsteinschätzung.
+  function weiterOhneZwang() {
+    if (speichertBewertung) return; // Speichern läuft schon (Taste oder vorheriger Wisch)
+    if (ausgewaehlteBewertung) {
+      void weiterKlick();
+      return;
+    }
+    // Keine Bewertung gewählt -> nichts speichern, einfach überspringen.
+    if (navigiertRef.current) return;
+    navigiertRef.current = true;
+    onNext({ antwort, bewertung: null });
+  }
+
+  function aufZugStart(e: React.PointerEvent) {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    zugStartRef.current = { x: e.clientX, y: e.clientY };
+    wurdeGewischtRef.current = false;
+    setZiehend(true);
+  }
+
+  function aufZugBewegung(e: React.PointerEvent) {
+    if (!zugStartRef.current) return;
+    const dx = e.clientX - zugStartRef.current.x;
+    const dy = e.clientY - zugStartRef.current.y;
+    if (Math.abs(dx) > Math.abs(dy)) setDragX(dx);
+  }
+
+  function aufZugEnde(e: React.PointerEvent) {
+    if (!zugStartRef.current) return;
+    const dx = e.clientX - zugStartRef.current.x;
+    const dy = e.clientY - zugStartRef.current.y;
+    zugStartRef.current = null;
+    setZiehend(false);
+
+    const istWisch = dx < -70 && Math.abs(dx) > Math.abs(dy) * 1.5;
+    if (istWisch) {
+      wurdeGewischtRef.current = true;
+      setDragX(-500);
+      window.setTimeout(weiterOhneZwang, 180);
+    } else {
+      setDragX(0);
+    }
+  }
+
+  function aufZugAbbruch() {
+    zugStartRef.current = null;
+    setZiehend(false);
+    setDragX(0);
+  }
+
+  // Nach einem erkannten Wisch soll der abschließende Klick die Karte nicht
+  // zusätzlich umdrehen.
+  function aufKarteKlick() {
+    if (wurdeGewischtRef.current) {
+      wurdeGewischtRef.current = false;
+      return;
+    }
+    karteDrehen();
+  }
+
   return (
     <div className="relative mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-6 p-6 pb-4">
       <div className="flex flex-col gap-3">
@@ -155,10 +225,12 @@ export function QuestionScreen({
             </button>
             <button
               type="button"
+              aria-label="Abbrechen"
+              title="Abbrechen"
               onClick={abbrechenKlick}
-              className="text-sm font-medium text-red-600 hover:underline"
+              className="text-xl leading-none text-red-600"
             >
-              Abbrechen
+              ✕
             </button>
           </div>
         </div>
@@ -189,18 +261,28 @@ export function QuestionScreen({
         </div>
       </div>
 
-      {/* Flashcard: Vorderseite = Frage, Rückseite = Musterantwort */}
+      {/* Flashcard: Vorderseite = Frage, Rückseite = Musterantwort. Nach links
+          wischen (überall auf der Karte) springt zur nächsten Frage. */}
       <div className="[perspective:1400px]">
         <div
-          className="grid min-h-[19rem] transition-transform duration-500 [transform-style:preserve-3d]"
-          style={{ transform: gedreht ? "rotateY(180deg)" : "rotateY(0deg)" }}
+          onPointerDown={aufZugStart}
+          onPointerMove={aufZugBewegung}
+          onPointerUp={aufZugEnde}
+          onPointerCancel={aufZugAbbruch}
+          className={`grid min-h-[19rem] touch-pan-y [transform-style:preserve-3d] ${
+            ziehend ? "" : "transition duration-300 ease-out"
+          }`}
+          style={{
+            transform: `translateX(${dragX}px) rotate(${dragX / 28}deg) rotateY(${gedreht ? 180 : 0}deg)`,
+            opacity: dragX <= -400 ? 0 : 1,
+          }}
         >
           {/* Vorderseite */}
           <div
             role="button"
             tabIndex={gedreht ? -1 : 0}
             aria-hidden={gedreht}
-            onClick={karteDrehen}
+            onClick={aufKarteKlick}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
@@ -219,7 +301,10 @@ export function QuestionScreen({
             {question.bild_frage_url && (
               <ZoombaresBild src={question.bild_frage_url} alt="Bild zur Frage" />
             )}
-            <span className="mt-auto pt-2 text-sm text-accent">Tippen zum Umdrehen →</span>
+            <div className="mt-auto flex items-center justify-between pt-2 text-sm text-accent">
+              <span>👆 Umdrehen</span>
+              <span>Wischen ⟵</span>
+            </div>
           </div>
 
           {/* Rückseite */}
@@ -227,7 +312,7 @@ export function QuestionScreen({
             role="button"
             tabIndex={gedreht ? 0 : -1}
             aria-hidden={!gedreht}
-            onClick={karteDrehen}
+            onClick={aufKarteKlick}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
@@ -284,7 +369,10 @@ export function QuestionScreen({
                 </button>
               </>
             )}
-            <span className="mt-auto pt-2 text-sm text-accent">← Zurück zur Frage</span>
+            <div className="mt-auto flex items-center justify-between pt-2 text-sm text-accent">
+              <span>↺ Zurück</span>
+              <span>Wischen ⟵</span>
+            </div>
           </div>
         </div>
       </div>
@@ -324,7 +412,7 @@ export function QuestionScreen({
           disabled={status === "laden"}
           className="kp-btn-primary py-3.5"
         >
-          {status === "laden" ? "Musterantwort wird geladen…" : "Musterantwort aufdecken"}
+          {status === "laden" ? "Musterantwort wird geladen…" : "👁️ Musterantwort aufdecken"}
         </button>
       )}
 
@@ -360,7 +448,7 @@ export function QuestionScreen({
                       : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
                   }`}
                 >
-                  {opt.label}
+                  <span aria-hidden>{opt.icon}</span> {opt.label}
                 </button>
               ))}
             </div>
@@ -375,8 +463,11 @@ export function QuestionScreen({
               onClick={weiterKlick}
               className="kp-btn-primary w-full py-3.5"
             >
-              {speichertBewertung ? "…" : "Nächste Frage"}
+              {speichertBewertung ? "…" : "Nächste Frage →"}
             </button>
+            <p className="mt-1.5 text-center text-xs text-zinc-400">
+              oder auf der Karte nach links wischen, um ohne Bewertung weiterzugehen
+            </p>
           </div>
         </div>
       )}
